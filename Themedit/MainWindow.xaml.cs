@@ -1,4 +1,4 @@
-// Version: 1.0.0.5
+// Version: 1.0.0.7
 // Copyright (c) 2024 Softbery by Pawe� Tobis
 using MahApps.Metro.Controls;
 using Microsoft.VisualStudio.Threading;
@@ -802,6 +802,11 @@ namespace Themedit
                 _themeEditorWindow = new ThemeEditorWindow();
                 _themeEditorWindow.Show();
             }
+        }
+
+        private void _mediaElement_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            _mediaElement.Focus();
         }
     }
     public enum ScreenOptions

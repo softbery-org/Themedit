@@ -87,7 +87,7 @@
                 GotFocus="_mediaElement_GotFocus"
                 KeyDown="_mediaElement_KeyDown"
                 LoadedBehavior="Manual"
-                Volume="100" />
+                Volume="100" MouseDown="_mediaElement_MouseDown" />
             <local:LabelTimer
                 x:Name="_lblTimer"
                 Width="125"

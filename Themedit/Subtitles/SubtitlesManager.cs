@@ -1,4 +1,4 @@
-// Version: 1.0.0.5
+// Version: 1.0.0.7
 // Copyright (c) 2024 Softbery by Paweł Tobis
 using Player.Subtiles;
 using System;
