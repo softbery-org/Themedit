@@ -1,4 +1,4 @@
-// Version: 1.0.0.39
+// Version: 1.0.0.40
 // Copyright (c) 2024 Softbery by Pawe� Tobis
 using MahApps.Metro.Controls;
 using MaterialDesignThemes.Wpf;
@@ -708,22 +708,33 @@ namespace Themedit
                     {
                         _mediaElement.Play();
                         _status = MediaElementStatus.Playing;
+                        _timer.Start();
                     }
                         else if (_status == MediaElementStatus.Playing)
                     {
                         _mediaElement.Pause();
                         _status = MediaElementStatus.Paused;
+                        _timer.Stop();
                     }
-                    _mediaControlPanel.labelTitle.Content = "Pressed SPACE";
-                    await Task.Delay(5000);
+
+                    _mediaControlPanel.labelTitle.Content = $"Key pressed - SPACE - video is {_status} ";
+                    for (int i = 0; i < 5; i++)
+                    {
+                        await Task.Delay(1000);
+                        _mediaControlPanel.labelTitle.Content += $".";
+                    }
+                    
                     _mediaControlPanel.labelTitle.Content = _videoPath;
                     break;
                 case Key.Left:
-                        if (_mediaElement.Position != TimeSpan.Zero)
-                            if (e.IsToggled)
-                                _mediaElement.Position -= TimeSpan.FromSeconds(10);
-                            else
-                                _mediaElement.Position -= TimeSpan.FromSeconds(5);
+                    if (_mediaElement.Position != TimeSpan.Zero)
+                        if (e.IsToggled)
+                        {
+                            _mediaElement.Position -= TimeSpan.FromSeconds(10);
+                            _mediaControlPanel.labelTitle.Content = "Key left - Move video position -10sec - ";
+                        }
+                        else
+                            _mediaElement.Position -= TimeSpan.FromSeconds(5);
                     break;
                 case Key.Right:
                     

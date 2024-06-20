@@ -1,4 +1,4 @@
-// Version: 1.0.0.39
+// Version: 1.0.0.40
 // Copyright (c) 2024 Softbery by Pawe� Tobis
 
 // Version: 1.0.0.79
