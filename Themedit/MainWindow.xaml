@@ -14,6 +14,39 @@
     Closing="metroWindow_Closing"
     Loaded="MetroWindow_OnLoaded">
     <Window.Resources>
+        <ControlTemplate x:Key="_mediaElementTemplate" TargetType="Button">
+            <Grid>
+                <MediaElement Name="mElement" />
+                <Ellipse Name="backgroundElement" Fill="{TemplateBinding Background}" />
+                <ContentPresenter
+                    x:Name="contentPresenter"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center" />
+                <VisualStateManager.VisualStateGroups>
+                    <VisualStateGroup Name="CommonStates">
+                        <VisualState Name="Normal">
+                            <Storyboard>
+                                <ColorAnimation
+                                    Storyboard.TargetName="backgroundElement"
+                                    Storyboard.TargetProperty="(Shape.Fill).(SolidColorBrush.Color)"
+                                    To="{TemplateBinding Background}"
+                                    Duration="0:0:0.3" />
+                            </Storyboard>
+                        </VisualState>
+                        <VisualState Name="MouseOver">
+                            <Storyboard>
+                                <ColorAnimation
+                                    Storyboard.TargetName="backgroundElement"
+                                    Storyboard.TargetProperty="(Shape.Fill).(SolidColorBrush.Color)"
+                                    To="Yellow"
+                                    Duration="0:0:0.3" />
+                            </Storyboard>
+                        </VisualState>
+                    </VisualStateGroup>
+                </VisualStateManager.VisualStateGroups>
+            </Grid>
+        </ControlTemplate>
+
         <Storyboard x:Key="fadeOut" FillBehavior="HoldEnd">
             <DoubleAnimation
                 Storyboard.TargetName="_mediaControlPanel"
@@ -81,13 +114,23 @@
 
     <DockPanel>
         <Grid>
+            <Grid.Background>
+                <ImageBrush TileMode="Tile" ImageSource="/softbery_team_plus_white_428x428_with_black.png" Stretch="None"/>
+            </Grid.Background>
             <MediaElement
                 x:Name="_mediaElement"
                 ForceCursor="True"
                 GotFocus="_mediaElement_GotFocus"
                 KeyDown="_mediaElement_KeyDown"
                 LoadedBehavior="Manual"
-                Volume="100" MouseDown="_mediaElement_MouseDown" />
+                MouseDown="_mediaElement_MouseDown"
+                Volume="100" OpacityMask="Black" />
+            <!-- "<Button
+                Width="100"
+                Height="12"
+                Template="{StaticResource _mediaElementTemplate}">
+                Test
+            </Button> -->
             <local:LabelTimer
                 x:Name="_lblTimer"
                 Width="125"
@@ -199,7 +242,7 @@
                     MaxHeight="150"
                     HorizontalAlignment="Left"
                     VerticalAlignment="Bottom"
-                    Loaded="_mediaControlPanel_Loaded" />
+                    Loaded="_mediaControlPanel_Loaded" MouseDown="_mediaControlPanel_MouseDown" />
             </Canvas>
         </Grid>
     </DockPanel>

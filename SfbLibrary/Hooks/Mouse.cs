@@ -6,6 +6,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Input;
 
 namespace SfbLibrary.Hooks
 {
@@ -64,22 +65,6 @@ namespace SfbLibrary.Hooks
 
             UnhookWindowsHookEx(hookID);
             hookID = IntPtr.Zero;
-        }
-
-        /// <summary>
-        /// Show mouse cursor
-        /// </summary>
-        public void ShowCursor()
-        {
-            ShowCaret(hookID);
-        }
-
-        /// <summary>
-        /// Hide mouse cursor
-        /// </summary>
-        public void HideCursor()
-        {
-            HideCaret(hookID);
         }
 
         /// <summary>

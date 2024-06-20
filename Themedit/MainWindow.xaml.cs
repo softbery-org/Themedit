@@ -1,6 +1,7 @@
-// Version: 1.0.0.7
+// Version: 1.0.0.39
 // Copyright (c) 2024 Softbery by Pawe� Tobis
 using MahApps.Metro.Controls;
+using MaterialDesignThemes.Wpf;
 using Microsoft.VisualStudio.Threading;
 using Microsoft.Win32;
 using System;
@@ -34,9 +35,10 @@ namespace Themedit
         private int _volumeLevel = 50;
         private bool _fullscreen = false;
         private Subtitles.SubtitlesManager _subtitlesManager = null;
-        private Dictionary<TimeSpan, SrtSub> _subtitles =  null;
+        private Dictionary<TimeSpan, SrtSub> _subtitles = null;
         private bool _subtitlesShow = true;
         private bool _mediaElementEnd;
+        private bool _isMediaElementSelected = true;
 
         /// <summary>
         /// Url to this application repository.
@@ -95,7 +97,7 @@ namespace Themedit
 
         private void OnMouseClickBeyondTextBox(object sender, EventArgs e)
         {
-            if (BeyondTextBoxMouseClick!=null)
+            if (BeyondTextBoxMouseClick != null)
             {
 
             }
@@ -105,13 +107,13 @@ namespace Themedit
         {
             while (!e.Cancel)
             {
-                
+
             }
         }
 
         private void mediaElementEvents()
         {
-            
+
         }
 
         private void mediaControlsButtonEvents()
@@ -145,7 +147,7 @@ namespace Themedit
         private void moveVideoForward(object sender, EventArgs e)
         {
             _mediaElement.Position += TimeSpan.FromSeconds(10);
-            
+
         }
 
         private void moveVideoRewers(object sender, EventArgs e)
@@ -186,23 +188,18 @@ namespace Themedit
 
         private void richTextBoxDrawContent(string text)
         {
-            // Create a FlowDocument to contain content for the RichTextBox.
-            FlowDocument myFlowDoc = new FlowDocument();
 
-            // Create a Run of plain text and some bold text.
-            Run myRun = new Run($"{text}");
+            FlowDocument flow_doc = new FlowDocument();
+            Run run = new Run($"{text}");
             //Bold myBold = new Bold(new Run("edit me!"));
 
-            // Create a paragraph and add the Run and Bold to it.
-            Paragraph myParagraph = new Paragraph();
-            myParagraph.Inlines.Add(myRun);
-            //myParagraph.Inlines.Add(myBold);
+            Paragraph paragraph = new Paragraph();
+            paragraph.Inlines.Add(run);
+            //paragraph.Inlines.Add(myBold);
 
-            // Add the paragraph to the FlowDocument.
-            myFlowDoc.Blocks.Add(myParagraph);
+            flow_doc.Blocks.Add(paragraph);
 
-            // Add initial content to the RichTextBox.
-            _mediaControlPanel.logRichTextBox.Document = myFlowDoc;
+            _mediaControlPanel.logRichTextBox.Document = flow_doc;
         }
 
         private void _timer_Tick(object sender, EventArgs e)
@@ -242,7 +239,6 @@ namespace Themedit
                         {
                             show = false;
                             run = 0;
-                            //_lblSubtitles.Content = String.Empty;
                         }
 
                         if (show && run == 1)
@@ -284,7 +280,6 @@ namespace Themedit
 
                 e = new LabelTimerEventArgs(_mediaControlPanel.labelTime);
                 uc.Foreground = e.Color;
-                //uc.Background = e.Color;
                 ChangeLabelTimerColorEvent?.Invoke(_mediaControlPanel.labelTime, e);
             }
         }
@@ -302,10 +297,29 @@ namespace Themedit
 
         private void BtnPause_Click(object sender, RoutedEventArgs e)
         {
-            _mediaElement.Pause();
-            _status = MediaElementStatus.Paused;
+            if (_status == MediaElementStatus.Playing)
+            {
+                _mediaElement.Pause();
+                _status = MediaElementStatus.Paused;
+                _timer.Stop();
+            }
+            else if (_status == MediaElementStatus.Paused)
+            {
+                _mediaElement.Play();
+                _status = MediaElementStatus.Playing;
+                _timer.Start();
+            }
+            else if (_status == MediaElementStatus.Stoped)
+            {
+                _mediaElement.Play();
+                _status = MediaElementStatus.Playing;
+                _timer.Start();
+            }
+
             _mediaControlPanel.labelTitle.Content = _status.ToString();
-            _timer.Stop();
+            richTextBoxDrawContent(_status.ToString());
+            Task.Delay(5000);
+            _mediaControlPanel.labelTitle.Content = _videoPath;
         }
 
         protected override void OnClosing(CancelEventArgs e)
@@ -349,7 +363,7 @@ namespace Themedit
             if (_subtitlesShow)
             {
                 _subtitlesShow = false;
-                _mediaControlPanel.labelSubtilesOnOff.Foreground = new SolidColorBrush(Color.FromArgb(100,255,0,0)); // Red color
+                _mediaControlPanel.labelSubtilesOnOff.Foreground = new SolidColorBrush(Color.FromArgb(100, 255, 0, 0)); // Red color
                 _mediaControlPanel.labelSubtilesOnOff.Content = "OFF";
                 _lblSubtitles.Content = String.Empty;
                 _icoPictogram.Kind = MahApps.Metro.IconPacks.PackIconMaterialDesignKind.Subtitles;
@@ -358,10 +372,12 @@ namespace Themedit
             else
             {
                 _subtitlesShow = true;
-                _mediaControlPanel.labelSubtilesOnOff.Foreground = new SolidColorBrush(Color.FromArgb(100,31,255,0)); // Green color
+                _mediaControlPanel.labelSubtilesOnOff.Foreground = new SolidColorBrush(Color.FromArgb(100, 31, 255, 0)); // Green color
                 _mediaControlPanel.labelSubtilesOnOff.Content = "ON";
             }
         }
+
+        private string _videoPath;
 
         private void BtnOpen_Click(object sender, RoutedEventArgs e)
         {
@@ -372,7 +388,8 @@ namespace Themedit
                              "All files (*.*)|*.*";
             if (ofd.ShowDialog() != null)
             {
-                try { 
+                try
+                {
 
                     if (_mediaElement != null)
                         _mediaElement.Stop();
@@ -386,7 +403,10 @@ namespace Themedit
                     }
 
                     _mediaElement.Play();
+                    _status = MediaElementStatus.Playing;
                     _mediaControlPanel.labelTitle.Content = ofd.FileName;
+                    _videoPath = ofd.FileName;
+
 
                     if (_mediaElement.NaturalDuration.HasTimeSpan)
                     {
@@ -400,7 +420,8 @@ namespace Themedit
                     }
                     _timer.Stop();
                     _timer.Start();
-                }catch(Exception ex)
+                }
+                catch (Exception ex)
                 {
                     richTextBoxDrawContent(ex.Message);
                 }
@@ -432,7 +453,7 @@ namespace Themedit
             FullscreenMode();
         }
 
-        private void FullscreenMode(bool on_off=false)
+        private void FullscreenMode(bool on_off = false)
         {
             if (_fullscreen)
             {
@@ -470,7 +491,7 @@ namespace Themedit
         {
             if (_mediaElement != null)
             {
-                if (_mediaElementEnd==true)
+                if (_mediaElementEnd == true)
                 {
                     _mediaElement.Stop();
                     _mediaElementEnd = false;
@@ -549,7 +570,7 @@ namespace Themedit
 
         private async Task PictogramViewerAsync(PictogramAction action, int delay_time)
         {
-            await Task.Run((async() =>
+            await Task.Run((async () =>
             {
                 if (action == PictogramAction.Hide)
                 {
@@ -600,6 +621,8 @@ namespace Themedit
             Loaded -= MetroWindow_OnLoaded;
         }
 
+        // 
+
         private void _mediaElement_MediaEnded(object sender, RoutedEventArgs e)
         {
             if (_mediaElement != null)
@@ -623,12 +646,12 @@ namespace Themedit
             _mouseNotMoveTimer.Start();
         }
 
-        private async void ShowControls()
+        private void ShowControls()
         {
             this.Cursor = Cursors.Arrow;
             //_mediaControlPanel.Visibility = Visibility.Visible;
             _lblTask.Visibility = Visibility.Visible;
-            
+
             var task = Task.Run((() =>
             {
                 this.BeginInvoke(() =>
@@ -638,29 +661,9 @@ namespace Themedit
                     {
                         myStoryboard.Begin();
                     }
-                    
+
                 });
             }));
-            /*
-            if (task.IsCompleted)
-            {
-                _mediaControlPanel.Opacity = 1.0;
-            }
-            else
-            {
-                task.Wait();
-            }*/
-
-            /*if (_mediaControlPanel.Opacity != 1.0)
-            {
-                Storyboard myStoryboard = (Storyboard)(this.FindResource("fadeIn"));
-                myStoryboard.Begin();
-            }
-            else
-            {
-                _mediaControlPanel.Opacity = 1.0;
-            }*/
-
         }
 
         private void HideControls()
@@ -668,7 +671,6 @@ namespace Themedit
             if (_lblTask.IsVisible && _mediaControlPanel.IsVisible)
             {
                 this.Cursor = Cursors.None;
-                //_mediaControlPanel.Visibility = Visibility.Hidden;
                 _lblTask.Visibility = Visibility.Hidden;
 
                 Storyboard myStoryboard = (Storyboard)(this.FindResource("fadeOut"));
@@ -691,8 +693,9 @@ namespace Themedit
             SfbLibrary.Taskbar.WindowsTaskbar.Show();
         }
 
-        private void _mediaElement_KeyDown(object sender, KeyEventArgs e)
+        private async void _mediaElement_KeyDown(object sender, KeyEventArgs e)
         {
+            richTextBoxDrawContent(sender.GetType().Name);
             switch (e.Key)
             {
                 case Key.Enter:
@@ -701,24 +704,34 @@ namespace Themedit
                     ShowControls();
                     break;
                 case Key.Space:
-                    if (_status == MediaElementStatus.Paused)
+                        if (_status == MediaElementStatus.Paused)
+                    {
                         _mediaElement.Play();
-                    else if (_status == MediaElementStatus.Playing)
+                        _status = MediaElementStatus.Playing;
+                    }
+                        else if (_status == MediaElementStatus.Playing)
+                    {
                         _mediaElement.Pause();
+                        _status = MediaElementStatus.Paused;
+                    }
+                    _mediaControlPanel.labelTitle.Content = "Pressed SPACE";
+                    await Task.Delay(5000);
+                    _mediaControlPanel.labelTitle.Content = _videoPath;
                     break;
                 case Key.Left:
-                    if (_mediaElement.Position != TimeSpan.Zero)
-                        if (e.IsToggled)
-                            _mediaElement.Position -= TimeSpan.FromSeconds(10);
-                        else
-                            _mediaElement.Position -= TimeSpan.FromSeconds(5);
+                        if (_mediaElement.Position != TimeSpan.Zero)
+                            if (e.IsToggled)
+                                _mediaElement.Position -= TimeSpan.FromSeconds(10);
+                            else
+                                _mediaElement.Position -= TimeSpan.FromSeconds(5);
                     break;
                 case Key.Right:
-                    if (_mediaElement.Position != TimeSpan.Zero)
-                        if (e.IsToggled)
-                            _mediaElement.Position += TimeSpan.FromSeconds(10);
-                        else
-                            _mediaElement.Position += TimeSpan.FromSeconds(5);
+                    
+                        if (_mediaElement.Position != TimeSpan.Zero)
+                            if (e.IsToggled)
+                                _mediaElement.Position += TimeSpan.FromSeconds(10);
+                            else
+                                _mediaElement.Position += TimeSpan.FromSeconds(5);
                     break;
                 case Key.S:
                     BtnSubtilesOnOff_Click(sender, e); // Subtitles on / off
@@ -728,7 +741,6 @@ namespace Themedit
                 case Key.Down:
                     break;
                 case Key.Escape:
-                    FullscreenMode(true);
                     break;
                 case Key.F11:
                     FullscreenMode();
@@ -788,25 +800,69 @@ namespace Themedit
 
         private void _mediaControlPanel_Loaded(object sender, RoutedEventArgs e)
         {
-            //Storyboard myStoryboard = (Storyboard)(this.FindResource("MoveMe"));
-            //Canvas.SetTop(_mediaControlPanel, 694);
-            //myStoryboard.Begin();
+
         }
 
-        private ThemeEditorWindow _themeEditorWindow;
+        private LayoutWindow _themeEditorWindow;
 
         private void OpenPlayerThemeEditor(object sender, RoutedEventArgs e)
         {
             if (_themeEditorWindow == null)
             {
-                _themeEditorWindow = new ThemeEditorWindow();
+                _themeEditorWindow = new LayoutWindow(); //new ThemeEditorWindow();
                 _themeEditorWindow.Show();
             }
         }
 
         private void _mediaElement_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            _mediaElement.Focus();
+            _isMediaElementSelected = true;
+            richTextBoxDrawContent(sender.GetType().Name + ": " + _isMediaElementSelected.ToString());
+
+            ClearFocus(sender);
+        }
+        public void ClearFocus(object sender)
+        {
+            /*// Kill logical focus
+            FocusManager.SetFocusedElement(FocusManager.GetFocusScope((FrameworkElement)sender), null);
+            // Kill keyboard focus
+            Keyboard.ClearFocus();*/
+            // Move to a parent that can take focus
+            FrameworkElement parent = (FrameworkElement)_mediaControlPanel.Parent;
+            while (parent != null && parent is IInputElement && !((IInputElement)parent).Focusable)
+            {
+                parent = (FrameworkElement)parent.Parent;
+            }
+
+            DependencyObject scope = FocusManager.GetFocusScope(_mediaControlPanel);
+            FocusManager.SetFocusedElement(scope, parent as IInputElement);
+        }
+
+        public void SetupMediaElementMouseHoverEffect(MediaElement mediaElement)
+        {
+            mediaElement.MouseEnter += (sender, e) =>
+            {
+                if (sender is MediaElement)
+                {
+                    MediaElement element = (MediaElement)sender;
+                    element.Focus();
+                }
+            };
+
+            mediaElement.MouseLeave += (sender, e) =>
+            {
+                if (sender is MediaElement)
+                {
+                    MediaElement element = (MediaElement)sender;
+                
+                    //element.Cursor = Cursors.Arrow;
+                }
+            };
+        }
+
+        private void _mediaControlPanel_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            _isMediaElementSelected = false;
         }
     }
     public enum ScreenOptions

@@ -298,6 +298,9 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="LayoutWindow.xaml.cs">
+      <DependentUpon>LayoutWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="PlayerInfo.cs" />
     <Compile Include="TaskLabel.cs" />
     <Compile Include="ThemeEditorWindow.xaml.cs">
@@ -306,6 +309,10 @@
     <Compile Include="TimerLabel.xaml.cs" />
     <Compile Include="Subtitles\SrtSub.cs" />
     <Compile Include="Subtitles\SubtitlesManager.cs" />
+    <Page Include="LayoutWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="ThemeEditorWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -384,7 +391,7 @@
     <Analyzer Include="..\packages\Microsoft.VisualStudio.Threading.Analyzers.17.10.48\analyzers\vb\Microsoft.VisualStudio.Threading.Analyzers.VisualBasic.dll" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Helper\" />
+    <Resource Include="softbery_team_plus_white_428x428_with_black.png" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SfbLibrary\SfbLibrary.csproj">
