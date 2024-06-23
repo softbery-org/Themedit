@@ -132,7 +132,7 @@
                 FontFamily="Calibri"
                 FontSize="12"
                 FontWeight="Bold"
-                Value="50">
+                Value="1" Maximum="1" LargeChange="0.1" SmallChange="0.01">
                 <ProgressBar.Foreground>
                     <SolidColorBrush Color="#CC02AB04" />
                 </ProgressBar.Foreground>
@@ -177,6 +177,7 @@
                 </RichTextBox>
             </Grid>
             <Label
+                IsHitTestVisible="False"
                 x:Name="lblVolumeLevel"
                 Grid.Row="1"
                 Grid.Column="1"
@@ -187,7 +188,7 @@
                 Content="50"
                 FontSize="14"
                 FontWeight="Bold"
-                Foreground="White">
+                Foreground="White" IsEnabled="False">
                 <Label.Effect>
                     <DropShadowEffect />
                 </Label.Effect>

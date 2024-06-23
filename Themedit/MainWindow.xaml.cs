@@ -1,15 +1,12 @@
-// Version: 1.0.0.40
+// Version: 1.0.0.69
 // Copyright (c) 2024 Softbery by Pawe� Tobis
 using MahApps.Metro.Controls;
-using MaterialDesignThemes.Wpf;
-using Microsoft.VisualStudio.Threading;
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -17,9 +14,7 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
-using System.Windows.Shapes;
 using System.Windows.Threading;
-using System.Xaml;
 using Themedit.Subtitles;
 
 namespace Themedit
@@ -32,9 +27,9 @@ namespace Themedit
         private MediaElementStatus _status;
         private DispatcherTimer _timer;
         private DispatcherTimer _mouseNotMoveTimer;
-        private int _volumeLevel = 50;
+        private double _volumeLevel = 1;
         private bool _fullscreen = false;
-        private Subtitles.SubtitlesManager _subtitlesManager = null;
+        private SubtitlesManager _subtitlesManager = null;
         private Dictionary<TimeSpan, SrtSub> _subtitles = null;
         private bool _subtitlesShow = true;
         private bool _mediaElementEnd;
@@ -78,7 +73,7 @@ namespace Themedit
         public MainWindow()
         {
             InitializeComponent();
-
+            
             // init fullscreen
             this.Loaded += MetroWindow_OnLoaded;
 
@@ -90,9 +85,10 @@ namespace Themedit
             PictogramViewer(PictogramAction.Hide);
 
             labelTimerColorSet(Brushes.Red);
-
+            Translation.SetLanguage("Polski");
+            var t = Translation.GetCurrentLanguage();
             _textBoxUrl.Visibility = Visibility.Hidden;
-            _lblSubtitles.Content = String.Empty;
+            _lblSubtitles.Content = t.ToString();
         }
 
         private void OnMouseClickBeyondTextBox(object sender, EventArgs e)
@@ -129,7 +125,7 @@ namespace Themedit
             _mediaControlPanel.btnFullscreen.Click += BtnFullscreen_Click;
             _mediaControlPanel.btnUrl.Click += BtnUrl_Click;
             _mediaControlPanel.btnSubtilesOnOff.Click += BtnSubtilesOnOff_Click;
-            _mediaControlPanel.btnSubtiles.Click += BtnSubtiles_Click;
+            _mediaControlPanel.btnSubtiles.Click += BtnOpenSubtiles_Click;
         }
 
         private void mediaControlsProgressBarEvents()
@@ -137,6 +133,7 @@ namespace Themedit
             _mediaControlPanel.progressBarVideo.ValueChanged += ProgressBarVideo_ValueChanged;
             _mediaControlPanel.progressBarVideo.MouseDown += ProgressBarVideo_MouseDown;
             _mediaControlPanel.progressBarVolume.MouseDown += ProgressBarVolume_MouseDown;
+            _mediaControlPanel.MouseEnter += _mediaControlPanel_MouseEnter;
         }
 
         private void keyboardEvents()
@@ -161,9 +158,9 @@ namespace Themedit
             var width = _mediaControlPanel.progressBarVolume.ActualWidth;
             var result = (click_position / width) * _mediaControlPanel.progressBarVolume.Maximum;
 
-            _mediaControlPanel.progressBarVolume.Value = (int)result;
+            _mediaControlPanel.progressBarVolume.Value = (double)result;
             _mediaElement.Volume = _mediaControlPanel.progressBarVolume.Value;
-            _mediaControlPanel.lblVolumeLevel.Content = (int)_mediaElement.Volume;
+            _mediaControlPanel.lblVolumeLevel.Content = (double)_mediaElement.Volume;
         }
 
         private void ProgressBarVideo_MouseDown(object sender, MouseButtonEventArgs e)
@@ -176,6 +173,7 @@ namespace Themedit
 
                 _mediaControlPanel.progressBarVideo.Value = result;
 
+                // Video jump to time
                 var jump_to_sec = (_mediaElement.NaturalDuration.TimeSpan.TotalSeconds * result) / _mediaControlPanel.progressBarVideo.Maximum;
                 _mediaElement.Position = TimeSpan.FromSeconds(jump_to_sec);
             }
@@ -188,7 +186,6 @@ namespace Themedit
 
         private void richTextBoxDrawContent(string text)
         {
-
             FlowDocument flow_doc = new FlowDocument();
             Run run = new Run($"{text}");
             //Bold myBold = new Bold(new Run("edit me!"));
@@ -198,12 +195,12 @@ namespace Themedit
             //paragraph.Inlines.Add(myBold);
 
             flow_doc.Blocks.Add(paragraph);
-
             _mediaControlPanel.logRichTextBox.Document = flow_doc;
         }
 
         private void _timer_Tick(object sender, EventArgs e)
         {
+            // Check is time span exist
             if (_mediaElement.NaturalDuration.HasTimeSpan)
             {
                 // Control label time
@@ -215,12 +212,13 @@ namespace Themedit
 
                 if (_subtitles != null && _subtitlesShow == true)
                 {
+                    // Draw subtitles if showing and exist
                     DrawSubtitles(_mediaElement.Position);
-                }
+                }            
             }
         }
 
-        public void DrawSubtitles(TimeSpan time)
+        private void DrawSubtitles(TimeSpan time)
         {
             var task = Task.Run(() =>
             {
@@ -263,11 +261,7 @@ namespace Themedit
             HideControls();
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns>Time left to media end</returns>
-        public TimeSpan GetTimeToVideoEnd()
+        private TimeSpan GetTimeToVideoEnd()
         {
             return _mediaElement.NaturalDuration.TimeSpan - _mediaElement.Position;
         }
@@ -338,7 +332,7 @@ namespace Themedit
             _timer.Stop();
         }
 
-        private void BtnSubtiles_Click(object sender, RoutedEventArgs e)
+        private void BtnOpenSubtiles_Click(object sender, RoutedEventArgs e)
         {
             var ofd = new OpenFileDialog();
             ofd.Filter = "Subtitles files(*.txt;*.srt)|*.txt;*.srt|" +
@@ -407,6 +401,9 @@ namespace Themedit
                     _mediaControlPanel.labelTitle.Content = ofd.FileName;
                     _videoPath = ofd.FileName;
 
+                    _volumeLevel = 1.0;
+                    _mediaElement.Volume = _volumeLevel;
+                    _mediaControlPanel.lblVolumeLevel.Content = _volumeLevel.ToString();
 
                     if (_mediaElement.NaturalDuration.HasTimeSpan)
                     {
@@ -414,9 +411,6 @@ namespace Themedit
                         {
                             var s = File.ReadAllText($"{ofd.FileName}.tmp");
                         }
-
-                        _mediaControlPanel.lblVolumeLevel.Content = _volumeLevel.ToString();
-                        _mediaElement.Volume = _volumeLevel;
                     }
                     _timer.Stop();
                     _timer.Start();
@@ -425,6 +419,10 @@ namespace Themedit
                 {
                     richTextBoxDrawContent(ex.Message);
                 }
+            }
+            else
+            {
+                richTextBoxDrawContent("Someting gose wrong with opening file.");
             }
         }
 
@@ -507,10 +505,10 @@ namespace Themedit
         private void BtnVolumeUp_Click(object sender, RoutedEventArgs e)
         {
             _icoPictogram.Kind = MahApps.Metro.IconPacks.PackIconMaterialDesignKind.VolumeUp;
-            _mediaElement.Volume++;
-            if (_mediaElement.Volume >= 100)
+            _mediaElement.Volume+=0.05;
+            if (_mediaElement.Volume >= 1.0)
             {
-                _mediaElement.Volume = 100;
+                _mediaElement.Volume = 1.0;
             }
 
             _mediaControlPanel.lblVolumeLevel.Content = _mediaElement.Volume.ToString();
@@ -519,7 +517,7 @@ namespace Themedit
 
         private void BtnVolumeDown_Click(object sender, RoutedEventArgs e)
         {
-            _mediaElement.Volume--;
+            _mediaElement.Volume-=0.05;
             if (_mediaElement.Volume <= 0)
             {
                 _mediaElement.Volume = 0;
@@ -543,7 +541,7 @@ namespace Themedit
             {
                 _icoPictogram.Kind = MahApps.Metro.IconPacks.PackIconMaterialDesignKind.VolumeMute;
                 PictogramViewer(PictogramAction.Show);
-                _volumeLevel = (int)_mediaElement.Volume;
+                _volumeLevel = (double)_mediaElement.Volume;
                 _mediaElement.Volume = 0;
             }
 
@@ -874,6 +872,17 @@ namespace Themedit
         private void _mediaControlPanel_MouseDown(object sender, MouseButtonEventArgs e)
         {
             _isMediaElementSelected = false;
+        }
+
+        private void _mediaControlPanel_MouseEnter(object sender, MouseEventArgs e)
+        {
+            Cursor = Cursors.Arrow;
+            _mediaControlPanel.Opacity = 1;
+        }
+
+        private void _mediaControlPanel_MouseLeave(object sender, MouseEventArgs e)
+        {
+            
         }
     }
     public enum ScreenOptions

@@ -10,7 +10,9 @@
 .[Ss]oftbery/
 .sbver
 .sbver_files
-
+language_copy.sh
+[Ll]anguages/
+packages/
 
 # User-specific files
 *.rsuser

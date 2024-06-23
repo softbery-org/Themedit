@@ -24,7 +24,7 @@ namespace SfbLibrary.Configuration
     /// </example>
     public class Ini
     {
-        public const string DEFAULT_CONFIG_PATH = "config.ini";
+        public const string DEFAULT_CONFIG_PATH = "config/cfg.ini";
         public Dictionary<string, string> Settings { get => _settings; }
 
         private Dictionary<string, string> _settings = new Dictionary<string, string>();
@@ -47,7 +47,7 @@ namespace SfbLibrary.Configuration
             }
         }
 
-        public async Task Open(string config_file = "config/config.ini")
+        public async Task Open(string config_file = "config/cfg.ini")
         {
             _builder = Host.CreateApplicationBuilder(_args);
             _builder.Configuration.Sources.Clear();

@@ -1,4 +1,4 @@
-// Version: 1.0.0.49
+// Version: 1.0.0.6
 // Copyright (c) 2024 Softbery by Paweł Tobis
 using System;
 using System.Collections.Generic;
@@ -17,11 +17,11 @@ using System.Windows.Shapes;
 namespace Themedit
 {
     /// <summary>
-    /// Logika interakcji dla klasy LayoutWindow.xaml
+    /// Logika interakcji dla klasy ListWindow.xaml
     /// </summary>
-    public partial class LayoutWindow : Window
+    public partial class ListWindow : Window
     {
-        public LayoutWindow()
+        public ListWindow()
         {
             InitializeComponent();
         }

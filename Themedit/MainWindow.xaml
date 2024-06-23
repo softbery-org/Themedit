@@ -6,6 +6,7 @@
     xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
     xmlns:local="clr-namespace:Themedit"
     xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
+    xmlns:naudio="clr-namespace:NAudio;assembly=NAudio.Core"
     xmlns:wpf="http://schemas.microsoft.com/netfx/2007/xaml/presentation"
     x:Name="_metroWindow"
     Title="MainWindow"
@@ -13,18 +14,18 @@
     Height="820"
     Closing="metroWindow_Closing"
     Loaded="MetroWindow_OnLoaded">
-    <Window.Resources>
-        <ControlTemplate x:Key="_mediaElementTemplate" TargetType="Button">
+    <mah:MetroWindow.Resources>
+        <ControlTemplate x:Key="_mediaElementTemplate" TargetType="{x:Type Button}">
             <Grid>
-                <MediaElement Name="mElement" />
-                <Ellipse Name="backgroundElement" Fill="{TemplateBinding Background}" />
+                <MediaElement x:Name="mElement" />
+                <Ellipse x:Name="backgroundElement" Fill="{TemplateBinding Background}" />
                 <ContentPresenter
                     x:Name="contentPresenter"
                     HorizontalAlignment="Center"
                     VerticalAlignment="Center" />
                 <VisualStateManager.VisualStateGroups>
-                    <VisualStateGroup Name="CommonStates">
-                        <VisualState Name="Normal">
+                    <VisualStateGroup x:Name="CommonStates">
+                        <VisualState x:Name="Normal">
                             <Storyboard>
                                 <ColorAnimation
                                     Storyboard.TargetName="backgroundElement"
@@ -33,7 +34,7 @@
                                     Duration="0:0:0.3" />
                             </Storyboard>
                         </VisualState>
-                        <VisualState Name="MouseOver">
+                        <VisualState x:Name="MouseOver">
                             <Storyboard>
                                 <ColorAnimation
                                     Storyboard.TargetName="backgroundElement"
@@ -61,7 +62,7 @@
                 To="1.0"
                 Duration="0:0:2" />
         </Storyboard>
-    </Window.Resources>
+    </mah:MetroWindow.Resources>
     <mah:MetroWindow.LeftWindowCommands>
         <mah:WindowCommands>
             <Button Click="LaunchGitHubSite" ToolTip="Open up the GitHub site">
@@ -84,10 +85,10 @@
                                 Height="22"
                                 VerticalAlignment="Center"
                                 Kind="Alien" />
-                            <wpf:TextBlock
+                            <TextBlock
                                 Margin="4,0,0,0"
                                 VerticalAlignment="Center"
-                                Text="{wpf:Binding}" />
+                                Text="{Binding}" />
                         </StackPanel>
                     </DataTemplate>
                 </Button.ContentTemplate>
@@ -101,10 +102,10 @@
                                 Height="22"
                                 VerticalAlignment="Center"
                                 Kind="Eye" />
-                            <wpf:TextBlock
+                            <TextBlock
                                 Margin="4,0,0,0"
                                 VerticalAlignment="Center"
-                                Text="{wpf:Binding}" />
+                                Text="{Binding}" />
                         </StackPanel>
                     </DataTemplate>
                 </Button.ContentTemplate>
@@ -115,7 +116,10 @@
     <DockPanel>
         <Grid>
             <Grid.Background>
-                <ImageBrush TileMode="Tile" ImageSource="/softbery_team_plus_white_428x428_with_black.png" Stretch="None"/>
+                <ImageBrush
+                    ImageSource="/softbery_team_plus_white_428x428_with_black.png"
+                    Stretch="None"
+                    TileMode="Tile" />
             </Grid.Background>
             <MediaElement
                 x:Name="_mediaElement"
@@ -124,13 +128,14 @@
                 KeyDown="_mediaElement_KeyDown"
                 LoadedBehavior="Manual"
                 MouseDown="_mediaElement_MouseDown"
-                Volume="100" OpacityMask="Black" />
+                OpacityMask="Black"
+                Volume="100" />
             <!-- "<Button
                 Width="100"
                 Height="12"
                 Template="{StaticResource _mediaElementTemplate}">
                 Test
-            </Button> -->
+            </Button>-->
             <local:LabelTimer
                 x:Name="_lblTimer"
                 Width="125"
@@ -228,22 +233,19 @@
                     <DropShadowEffect />
                 </local:TaskLabel.Effect>
             </local:TaskLabel>
-            <Canvas
-                x:Name="_canvas"
-                Width="800"
+            <local:MediaControls
+                x:Name="_mediaControlPanel"
+                Canvas.Bottom="10"
                 Height="110"
+                MaxWidth="800"
+                MaxHeight="150"
                 HorizontalAlignment="Center"
-                VerticalAlignment="Bottom">
-                <local:MediaControls
-                    x:Name="_mediaControlPanel"
-                    Canvas.Bottom="10"
-                    Height="110"
-                    MaxWidth="800"
-                    MaxHeight="150"
-                    HorizontalAlignment="Left"
-                    VerticalAlignment="Bottom"
-                    Loaded="_mediaControlPanel_Loaded" MouseDown="_mediaControlPanel_MouseDown" />
-            </Canvas>
+                VerticalAlignment="Bottom"
+                Loaded="_mediaControlPanel_Loaded"
+                MouseDown="_mediaControlPanel_MouseDown"
+                MouseEnter="_mediaControlPanel_MouseEnter"
+                MouseLeave="_mediaControlPanel_MouseLeave" />
+
         </Grid>
     </DockPanel>
 </mah:MetroWindow>

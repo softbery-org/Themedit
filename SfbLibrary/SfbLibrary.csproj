@@ -256,6 +256,7 @@
     </Compile>
     <Compile Include="Configuration\Config.cs" />
     <Compile Include="Configuration\ConfigFileType.cs" />
+    <Compile Include="Configuration\ConfigManager.cs" />
     <Compile Include="Configuration\Configs.cs" />
     <Compile Include="Configuration\Ini.cs" />
     <Compile Include="Example.cs" />

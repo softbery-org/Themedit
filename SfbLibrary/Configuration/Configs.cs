@@ -21,7 +21,7 @@ namespace SfbLibrary.Configuration
         {
             var typos = Enum.GetNames(typeof(ConfigFileType));
             var selected_type = Enum.GetName(typeof(ConfigFileType), file_type);
-            _configPath = $"{AppDomain.CurrentDomain.BaseDirectory}config/config.{selected_type}";
+            _configPath = $"{AppDomain.CurrentDomain.BaseDirectory}config/cfg.{selected_type}";
             open(_configPath);
         }
 
@@ -29,7 +29,7 @@ namespace SfbLibrary.Configuration
         {
             _builder = Host.CreateApplicationBuilder(_args);
             _builder.Configuration.Sources.Clear();
-            _builder.Configuration.AddEnvironmentVariables(prefix: "Video_");
+            _builder.Configuration.AddEnvironmentVariables(prefix: "");
 
             IHostEnvironment env = _builder.Environment;
 
