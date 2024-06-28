@@ -1,6 +1,6 @@
 ﻿#!/bin/sh
 
-_VERSION=`cat .sbver`
+_VERSION="Version `cat .sbver`"
 
 echo ""
 echo ""
