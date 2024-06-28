@@ -13,7 +13,7 @@
     Width="1024"
     Height="820"
     Closing="metroWindow_Closing"
-    Loaded="MetroWindow_OnLoaded">
+    Loaded="MetroWindow_OnLoaded" Closed="_metroWindow_Closed">
     <mah:MetroWindow.Resources>
         <ControlTemplate x:Key="_mediaElementTemplate" TargetType="{x:Type Button}">
             <Grid>
@@ -50,14 +50,14 @@
 
         <Storyboard x:Key="fadeOut" FillBehavior="HoldEnd">
             <DoubleAnimation
-                Storyboard.TargetName="_mediaControlPanel"
+                Storyboard.TargetName="_mediaControls"
                 Storyboard.TargetProperty="(Opacity)"
                 To="0.0"
                 Duration="0:0:2" />
         </Storyboard>
         <Storyboard x:Key="fadeIn" FillBehavior="HoldEnd">
             <DoubleAnimation
-                Storyboard.TargetName="_mediaControlPanel"
+                Storyboard.TargetName="_mediaControls"
                 Storyboard.TargetProperty="(Opacity)"
                 To="1.0"
                 Duration="0:0:2" />
@@ -234,7 +234,7 @@
                 </local:TaskLabel.Effect>
             </local:TaskLabel>
             <local:MediaControls
-                x:Name="_mediaControlPanel"
+                x:Name="_mediaControls"
                 Canvas.Bottom="10"
                 Height="110"
                 MaxWidth="800"

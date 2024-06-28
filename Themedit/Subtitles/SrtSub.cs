@@ -1,4 +1,4 @@
-// Version: 1.0.0.69
+// Version: 1.0.0.181
 // Copyright (c) 2024 Softbery by Paweł Tobis
 using System;
 using System.Collections.Generic;
@@ -66,7 +66,7 @@ namespace Themedit.Subtitles
         }
 
         /*/// <summary>
-        /// Add subtitles
+        /// AddTrack subtitles
         /// </summary>
         /// <param name="startTime"></param>
         public void AddStartTime(TimeSpan startTime)

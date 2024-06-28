@@ -1,4 +1,4 @@
-// Version: 1.0.0.145
+// Version: 1.0.0.257
 using ControlzEx.Theming;
 using System;
 using System.Collections.Generic;
@@ -8,6 +8,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using SfbLibrary.Languages;
+using System.IO;
+using System.Windows.Threading;
+using Themedit.src;
 
 namespace Themedit
 {
@@ -17,9 +20,9 @@ namespace Themedit
     public partial class App : Application
     {
         public static Dictionary<string, string> Config = new Dictionary<string, string>();
-        public static IList<ILanguage> LanguagesList;
+        public static IList<ILanguage> Languages;
 
-        SfbLibrary.Configuration.ConfigManager _configManager;
+        private SfbLibrary.Configuration.Ini _ini;
 
         protected override void OnStartup(StartupEventArgs e)
         {
@@ -35,31 +38,27 @@ namespace Themedit
             GetConfig();
             // Set language
             GetLanguages();
+            // Plugins path
+            AppResourceCreator.PluginsPath();
+        }
+
+        protected override void OnExit(ExitEventArgs e)
+        {
+            _ini.Close();
+            base.OnExit(e);
+            Application.Current.Shutdown();
         }
 
         private void GetLanguages()
         {
             var langs = Language.LoadLanguages();
-            LanguagesList = langs;
+            Languages = langs;
         }
 
-        ///         [Section: Header]
-        ///         key1=value1
-        ///         key2 = " value2 "
-        ///         ; comment
-        ///         # comment
-        ///         / comment
         private void GetConfig()
         {
-            _configManager = new SfbLibrary.Configuration.ConfigManager();
-            Config = _configManager.Configs;
-
+            _ini = new SfbLibrary.Configuration.Ini();
+            Config = _ini.GetSettings();
         }
-    }
-
-    public enum LanguagesTypes
-    {
-        Polski,
-        English
     }
 }

@@ -319,13 +319,21 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="AppResourceCreator.cs" />
     <Compile Include="LayoutWindow.xaml.cs">
       <DependentUpon>LayoutWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="ListWindow.xaml.cs">
-      <DependentUpon>ListWindow.xaml</DependentUpon>
+    <Compile Include="PlaylistWindow.xaml.cs">
+      <DependentUpon>PlaylistWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="PlayerInfo.cs" />
+    <Compile Include="src\AppHelp.cs" />
+    <Compile Include="src\AutoUpdate.cs" />
+    <Compile Include="src\MediaInfo.cs" />
+    <Compile Include="src\Playlist.cs" />
+    <Compile Include="src\RegistryHelp.cs" />
+    <Compile Include="src\TaskDialog.cs" />
+    <Compile Include="src\Track.cs" />
     <Compile Include="TaskLabel.cs" />
     <Compile Include="ThemeEditorWindow.xaml.cs">
       <DependentUpon>ThemeEditorWindow.xaml</DependentUpon>
@@ -338,7 +346,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="ListWindow.xaml">
+    <Page Include="PlaylistWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -362,7 +370,7 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Page Include="MediaControlsPanel.xaml">
+    <Page Include="MediaControls.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -380,8 +388,8 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="MediaControlsPanel.xaml.cs">
-      <DependentUpon>MediaControlsPanel.xaml</DependentUpon>
+    <Compile Include="MediaControls.xaml.cs">
+      <DependentUpon>MediaControls.xaml</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>

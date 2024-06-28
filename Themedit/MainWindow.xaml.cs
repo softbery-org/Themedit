@@ -1,4 +1,4 @@
-// Version: 1.0.0.69
+// Version: 1.0.0.181
 // Copyright (c) 2024 Softbery by Pawe� Tobis
 using MahApps.Metro.Controls;
 using Microsoft.Win32;
@@ -15,6 +15,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Threading;
+using Themedit.src;
 using Themedit.Subtitles;
 
 namespace Themedit
@@ -24,6 +25,9 @@ namespace Themedit
     /// </summary>
     public partial class MainWindow : MetroWindow
     {
+        public delegate void dlgPlayerHandle(object sender, PlayerEventArgs e);
+        public event dlgPlayerHandle OnPlayer;
+
         private MediaElementStatus _status;
         private DispatcherTimer _timer;
         private DispatcherTimer _mouseNotMoveTimer;
@@ -67,6 +71,8 @@ namespace Themedit
 
         public double WaitTime { get; set; } = 5;
 
+        public static Action<object, string> OnOpeningMedia;
+
         /// <summary>
         /// Constructor
         /// </summary>
@@ -85,10 +91,66 @@ namespace Themedit
             PictogramViewer(PictogramAction.Hide);
 
             labelTimerColorSet(Brushes.Red);
-            Translation.SetLanguage("Polski");
-            var t = Translation.GetCurrentLanguage();
+            
             _textBoxUrl.Visibility = Visibility.Hidden;
-            _lblSubtitles.Content = t.ToString();
+            _lblSubtitles.Content = String.Empty;
+            _mediaControls.MWindow = this;
+            _mediaElement.MediaEnded += _mediaElement_MediaEnded;
+
+            OnOpeningMedia += open;
+        }
+
+        private void open(object sender, string e = "")
+        {
+            if (e != null)
+            {
+                if (_mediaElement != null)
+                {
+                    if (sender != null)
+                    {
+                        if (sender.GetType() == typeof(PlaylistWindow))
+                        {
+                            var obj = sender as PlaylistWindow;
+                            if (obj._listView.SelectedItem!=null)
+                                richTextBoxDrawContent(obj._listView.SelectedItem.ToString());
+                        }
+                    }
+
+                    _mediaElement.Source = new Uri(e);
+                    _mediaElement.Stop();
+                    _mediaElement.Play();
+                    _status = MediaElementStatus.Playing;
+                    _mediaControls.labelTitle.Content = e;
+                    _videoPath = e;
+                    _timer.Stop();
+                    _timer.Start();
+                }
+            }
+        }
+
+        private void play()
+        {
+            if (_mediaElement != null)
+            {
+                if (_status==MediaElementStatus.Playing)
+                {
+                    _mediaElement.Pause();
+                    _timer.Stop();
+                    _status = MediaElementStatus.Paused;
+                }
+                else if (_status==MediaElementStatus.Paused)
+                {
+                    _mediaElement.Play();
+                    _timer.Start();
+                    _status = MediaElementStatus.Playing;
+                }
+                else if (_status == MediaElementStatus.Stoped)
+                {
+                    _mediaElement.Play();
+                    _timer.Start();
+                    _status = MediaElementStatus.Playing;
+                }
+            }
         }
 
         private void OnMouseClickBeyondTextBox(object sender, EventArgs e)
@@ -114,26 +176,32 @@ namespace Themedit
 
         private void mediaControlsButtonEvents()
         {
-            _mediaControlPanel.btnPlay.Click += BtnPlay_Click;
-            _mediaControlPanel.btnOpen.Click += BtnOpen_Click;
-            _mediaControlPanel.btnStop.Click += BtnStop_Click;
-            _mediaControlPanel.btnPause.Click += BtnPause_Click;
-            _mediaControlPanel.btnClose.Click += BtnClose_Click;
-            _mediaControlPanel.btnMute.Click += BtnVolumeMute_Click;
-            _mediaControlPanel.btnVolumeUp.Click += BtnVolumeUp_Click;
-            _mediaControlPanel.btnVolumeDown.Click += BtnVolumeDown_Click;
-            _mediaControlPanel.btnFullscreen.Click += BtnFullscreen_Click;
-            _mediaControlPanel.btnUrl.Click += BtnUrl_Click;
-            _mediaControlPanel.btnSubtilesOnOff.Click += BtnSubtilesOnOff_Click;
-            _mediaControlPanel.btnSubtiles.Click += BtnOpenSubtiles_Click;
+            _mediaControls.btnPlay.Click += BtnPlay_Click;
+            _mediaControls.btnNext.Click += BtnNext_Click;
+            _mediaControls.btnOpen.Click += BtnOpen_Click;
+            _mediaControls.btnStop.Click += BtnStop_Click;
+            _mediaControls.btnPause.Click += BtnPause_Click;
+            _mediaControls.btnClose.Click += BtnClose_Click;
+            _mediaControls.btnMute.Click += BtnVolumeMute_Click;
+            _mediaControls.btnVolumeUp.Click += BtnVolumeUp_Click;
+            _mediaControls.btnVolumeDown.Click += BtnVolumeDown_Click;
+            _mediaControls.btnFullscreen.Click += BtnFullscreen_Click;
+            _mediaControls.btnUrl.Click += BtnUrl_Click;
+            _mediaControls.btnSubtilesOnOff.Click += BtnSubtilesOnOff_Click;
+            _mediaControls.btnSubtiles.Click += BtnOpenSubtiles_Click;
+        }
+
+        private void BtnNext_Click(object sender, RoutedEventArgs e)
+        {
+            
         }
 
         private void mediaControlsProgressBarEvents()
         {
-            _mediaControlPanel.progressBarVideo.ValueChanged += ProgressBarVideo_ValueChanged;
-            _mediaControlPanel.progressBarVideo.MouseDown += ProgressBarVideo_MouseDown;
-            _mediaControlPanel.progressBarVolume.MouseDown += ProgressBarVolume_MouseDown;
-            _mediaControlPanel.MouseEnter += _mediaControlPanel_MouseEnter;
+            _mediaControls.progressBarVideo.ValueChanged += ProgressBarVideo_ValueChanged;
+            _mediaControls.progressBarVideo.MouseDown += ProgressBarVideo_MouseDown;
+            _mediaControls.progressBarVolume.MouseDown += ProgressBarVolume_MouseDown;
+            _mediaControls.MouseEnter += _mediaControlPanel_MouseEnter;
         }
 
         private void keyboardEvents()
@@ -154,27 +222,27 @@ namespace Themedit
 
         private void ProgressBarVolume_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            var click_position = e.GetPosition(_mediaControlPanel.progressBarVolume).X;
-            var width = _mediaControlPanel.progressBarVolume.ActualWidth;
-            var result = (click_position / width) * _mediaControlPanel.progressBarVolume.Maximum;
+            var click_position = e.GetPosition(_mediaControls.progressBarVolume).X;
+            var width = _mediaControls.progressBarVolume.ActualWidth;
+            var result = (click_position / width) * _mediaControls.progressBarVolume.Maximum;
 
-            _mediaControlPanel.progressBarVolume.Value = (double)result;
-            _mediaElement.Volume = _mediaControlPanel.progressBarVolume.Value;
-            _mediaControlPanel.lblVolumeLevel.Content = (double)_mediaElement.Volume;
+            _mediaControls.progressBarVolume.Value = (double)result;
+            _mediaElement.Volume = _mediaControls.progressBarVolume.Value;
+            _mediaControls.lblVolumeLevel.Content = (double)_mediaElement.Volume*100;
         }
 
         private void ProgressBarVideo_MouseDown(object sender, MouseButtonEventArgs e)
         {
             if (_mediaElement.NaturalDuration.HasTimeSpan)
             {
-                var click_position = e.GetPosition(_mediaControlPanel.progressBarVideo).X;
-                var width = _mediaControlPanel.progressBarVideo.ActualWidth;
-                var result = (click_position / width) * _mediaControlPanel.progressBarVideo.Maximum;
+                var click_position = e.GetPosition(_mediaControls.progressBarVideo).X;
+                var width = _mediaControls.progressBarVideo.ActualWidth;
+                var result = (click_position / width) * _mediaControls.progressBarVideo.Maximum;
 
-                _mediaControlPanel.progressBarVideo.Value = result;
+                _mediaControls.progressBarVideo.Value = result;
 
                 // Video jump to time
-                var jump_to_sec = (_mediaElement.NaturalDuration.TimeSpan.TotalSeconds * result) / _mediaControlPanel.progressBarVideo.Maximum;
+                var jump_to_sec = (_mediaElement.NaturalDuration.TimeSpan.TotalSeconds * result) / _mediaControls.progressBarVideo.Maximum;
                 _mediaElement.Position = TimeSpan.FromSeconds(jump_to_sec);
             }
         }
@@ -192,10 +260,10 @@ namespace Themedit
 
             Paragraph paragraph = new Paragraph();
             paragraph.Inlines.Add(run);
-            //paragraph.Inlines.Add(myBold);
+            //paragraph.Inlines.AddTrack(myBold);
 
             flow_doc.Blocks.Add(paragraph);
-            _mediaControlPanel.logRichTextBox.Document = flow_doc;
+            _mediaControls.logRichTextBox.Document = flow_doc;
         }
 
         private void _timer_Tick(object sender, EventArgs e)
@@ -204,11 +272,11 @@ namespace Themedit
             if (_mediaElement.NaturalDuration.HasTimeSpan)
             {
                 // Control label time
-                _mediaControlPanel.labelTime.Content = $"{_mediaElement.Position.Hours:00}:{_mediaElement.Position.Minutes:00}:{_mediaElement.Position.Seconds:00}/{_mediaElement.NaturalDuration.TimeSpan}";
+                _mediaControls.labelTime.Content = $"{_mediaElement.Position.Hours:00}:{_mediaElement.Position.Minutes:00}:{_mediaElement.Position.Seconds:00}/{_mediaElement.NaturalDuration.TimeSpan}";
                 // Label - time left to end media
                 _lblTimer.Content = $"-{GetTimeToVideoEnd().Hours:00}:{GetTimeToVideoEnd().Minutes:00}:{GetTimeToVideoEnd().Seconds:00}";
                 // ProgressBar
-                _mediaControlPanel.progressBarVideo.Value = (_mediaElement.Position.TotalSeconds * _mediaControlPanel.progressBarVideo.Maximum) / _mediaElement.NaturalDuration.TimeSpan.TotalSeconds;
+                _mediaControls.progressBarVideo.Value = (_mediaElement.Position.TotalSeconds * _mediaControls.progressBarVideo.Maximum) / _mediaElement.NaturalDuration.TimeSpan.TotalSeconds;
 
                 if (_subtitles != null && _subtitlesShow == true)
                 {
@@ -272,9 +340,9 @@ namespace Themedit
             {
                 var uc = sender as Label;
 
-                e = new LabelTimerEventArgs(_mediaControlPanel.labelTime);
+                e = new LabelTimerEventArgs(_mediaControls.labelTime);
                 uc.Foreground = e.Color;
-                ChangeLabelTimerColorEvent?.Invoke(_mediaControlPanel.labelTime, e);
+                ChangeLabelTimerColorEvent?.Invoke(_mediaControls.labelTime, e);
             }
         }
 
@@ -285,49 +353,37 @@ namespace Themedit
 
         private void BtnClose_Click(object sender, RoutedEventArgs e)
         {
-            _mediaControlPanel.labelTitle.Content = _status.ToString();
+            _mediaControls.labelTitle.Content = _status.ToString();
             Application.Current.Shutdown();
+        }
+
+        private async void DelayAsync(int ms)
+        {
+            await Task.Delay(ms);
         }
 
         private void BtnPause_Click(object sender, RoutedEventArgs e)
         {
-            if (_status == MediaElementStatus.Playing)
-            {
-                _mediaElement.Pause();
-                _status = MediaElementStatus.Paused;
-                _timer.Stop();
-            }
-            else if (_status == MediaElementStatus.Paused)
-            {
-                _mediaElement.Play();
-                _status = MediaElementStatus.Playing;
-                _timer.Start();
-            }
-            else if (_status == MediaElementStatus.Stoped)
-            {
-                _mediaElement.Play();
-                _status = MediaElementStatus.Playing;
-                _timer.Start();
-            }
+            play();
 
-            _mediaControlPanel.labelTitle.Content = _status.ToString();
+            _mediaControls.labelTitle.Content = _status.ToString();
             richTextBoxDrawContent(_status.ToString());
-            Task.Delay(5000);
-            _mediaControlPanel.labelTitle.Content = _videoPath;
+            DelayAsync(5000);
+            _mediaControls.labelTitle.Content = _videoPath;
         }
 
         protected override void OnClosing(CancelEventArgs e)
         {
             _mediaElement.Close();
             _status = MediaElementStatus.Closing;
-            _mediaControlPanel.labelTitle.Content = _status.ToString();
+            _mediaControls.labelTitle.Content = _status.ToString();
             base.OnClosing(e);
         }
 
         private void BtnStop_Click(object sender, RoutedEventArgs e)
         {
             _mediaElement.Stop();
-            _mediaControlPanel.labelTitle.Content = _status.ToString();
+            _mediaControls.labelTitle.Content = _status.ToString();
             _status = MediaElementStatus.Stoped;
             _timer.Stop();
         }
@@ -357,8 +413,8 @@ namespace Themedit
             if (_subtitlesShow)
             {
                 _subtitlesShow = false;
-                _mediaControlPanel.labelSubtilesOnOff.Foreground = new SolidColorBrush(Color.FromArgb(100, 255, 0, 0)); // Red color
-                _mediaControlPanel.labelSubtilesOnOff.Content = "OFF";
+                _mediaControls.labelSubtilesOnOff.Foreground = new SolidColorBrush(Color.FromArgb(100, 255, 0, 0)); // Red color
+                _mediaControls.labelSubtilesOnOff.Content = "OFF";
                 _lblSubtitles.Content = String.Empty;
                 _icoPictogram.Kind = MahApps.Metro.IconPacks.PackIconMaterialDesignKind.Subtitles;
                 PictogramViewerAsync(PictogramAction.Show, 5000);
@@ -366,8 +422,8 @@ namespace Themedit
             else
             {
                 _subtitlesShow = true;
-                _mediaControlPanel.labelSubtilesOnOff.Foreground = new SolidColorBrush(Color.FromArgb(100, 31, 255, 0)); // Green color
-                _mediaControlPanel.labelSubtilesOnOff.Content = "ON";
+                _mediaControls.labelSubtilesOnOff.Foreground = new SolidColorBrush(Color.FromArgb(100, 31, 255, 0)); // Green color
+                _mediaControls.labelSubtilesOnOff.Content = "ON";
             }
         }
 
@@ -375,7 +431,7 @@ namespace Themedit
 
         private void BtnOpen_Click(object sender, RoutedEventArgs e)
         {
-            _mediaControlPanel.labelTitle.Content = _status.ToString();
+            _mediaControls.labelTitle.Content = _status.ToString();
             var ofd = new OpenFileDialog();
             ofd.Filter = "Video files(*.avi;*.mp4;*.mkv;*.wmv;*.mpg;*.mpeg;)|*.avi;*.mp4;*.mkv;*.wmv;*.mpg;*.mpeg|" +
                              "Audio files(*.mp3;*.wma;*.wav;*.midi;*.ogg;*.flac;)|*.mp3;*.wma;*.wav;*.midi;*.ogg;*.flac|" +
@@ -384,6 +440,17 @@ namespace Themedit
             {
                 try
                 {
+
+                    try
+                    {
+                        var mi = new MediaInfo(_videoPath);
+                        var c = mi.GetInfo(MediaInfoStreamKind.Video, 0, null);
+                        richTextBoxDrawContent(c);
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show(ex.Message);
+                    }
 
                     if (_mediaElement != null)
                         _mediaElement.Stop();
@@ -398,12 +465,12 @@ namespace Themedit
 
                     _mediaElement.Play();
                     _status = MediaElementStatus.Playing;
-                    _mediaControlPanel.labelTitle.Content = ofd.FileName;
+                    _mediaControls.labelTitle.Content = ofd.FileName;
                     _videoPath = ofd.FileName;
 
                     _volumeLevel = 1.0;
                     _mediaElement.Volume = _volumeLevel;
-                    _mediaControlPanel.lblVolumeLevel.Content = _volumeLevel.ToString();
+                    _mediaControls.lblVolumeLevel.Content = _volumeLevel.ToString();
 
                     if (_mediaElement.NaturalDuration.HasTimeSpan)
                     {
@@ -466,7 +533,7 @@ namespace Themedit
                 this.WindowStyle = WindowStyle.SingleBorderWindow;
                 this.ResizeMode = ResizeMode.CanResize;
 
-                _mediaControlPanel.Visibility = Visibility.Visible;
+                _mediaControls.Visibility = Visibility.Visible;
                 _fullscreen = false;
             }
             else
@@ -485,21 +552,33 @@ namespace Themedit
             }
         }
 
-        private void BtnPlay_Click(object sender, RoutedEventArgs e)
+        private void MainWindow_PlayMedia(string obj)
         {
-            if (_mediaElement != null)
+            if (File.Exists(obj))
             {
-                if (_mediaElementEnd == true)
+                try
                 {
-                    _mediaElement.Stop();
-                    _mediaElementEnd = false;
-                }
 
+                _mediaElement.Source = new Uri(obj);
                 _mediaElement.Play();
                 _status = MediaElementStatus.Playing;
-                _mediaControlPanel.labelTime.Content = $"{_mediaElement.Position.Hours}:{_mediaElement.Position.Minutes}:{_mediaElement.Position.Seconds}";
+                _mediaControls.labelTime.Content = $"{_mediaElement.Position.Hours}:{_mediaElement.Position.Minutes}:{_mediaElement.Position.Seconds}";
                 _timer.Start();
+
+                }catch(Exception ex)
+                {
+                    richTextBoxDrawContent(ex.Message);
+                }
             }
+            else
+            {
+                richTextBoxDrawContent(obj + " not exist!");
+            }
+        }
+
+        private void BtnPlay_Click(object sender, RoutedEventArgs e)
+        {
+            play();
         }
 
         private void BtnVolumeUp_Click(object sender, RoutedEventArgs e)
@@ -511,7 +590,7 @@ namespace Themedit
                 _mediaElement.Volume = 1.0;
             }
 
-            _mediaControlPanel.lblVolumeLevel.Content = _mediaElement.Volume.ToString();
+            _mediaControls.lblVolumeLevel.Content = _mediaElement.Volume * 100;
             PictogramViewer(PictogramAction.Hide);
         }
 
@@ -527,7 +606,7 @@ namespace Themedit
             else
                 PictogramViewer(PictogramAction.Hide);
 
-            _mediaControlPanel.lblVolumeLevel.Content = _mediaElement.Volume.ToString();
+            _mediaControls.lblVolumeLevel.Content = _mediaElement.Volume * 100;
         }
 
         private void BtnVolumeMute_Click(object sender, RoutedEventArgs e)
@@ -545,7 +624,7 @@ namespace Themedit
                 _mediaElement.Volume = 0;
             }
 
-            _mediaControlPanel.lblVolumeLevel.Content = _mediaElement.Volume.ToString();
+            _mediaControls.lblVolumeLevel.Content = Math.Round(_mediaElement.Volume * 100, 0);
         }
 
         private void BtnUrl_Click(object sender, RoutedEventArgs e)
@@ -625,7 +704,7 @@ namespace Themedit
         {
             if (_mediaElement != null)
             {
-                _mediaElementEnd = true;
+                
             }
         }
 
@@ -647,7 +726,7 @@ namespace Themedit
         private void ShowControls()
         {
             this.Cursor = Cursors.Arrow;
-            //_mediaControlPanel.Visibility = Visibility.Visible;
+            //_mediaControls.Visibility = Visibility.Visible;
             _lblTask.Visibility = Visibility.Visible;
 
             var task = Task.Run((() =>
@@ -655,7 +734,7 @@ namespace Themedit
                 this.BeginInvoke(() =>
                 {
                     Storyboard myStoryboard = (Storyboard)(this.FindResource("fadeIn"));
-                    if (_mediaControlPanel.Opacity < 1.0)
+                    if (_mediaControls.Opacity < 1.0)
                     {
                         myStoryboard.Begin();
                     }
@@ -666,7 +745,7 @@ namespace Themedit
 
         private void HideControls()
         {
-            if (_lblTask.IsVisible && _mediaControlPanel.IsVisible)
+            if (_lblTask.IsVisible && _mediaControls.IsVisible)
             {
                 this.Cursor = Cursors.None;
                 _lblTask.Visibility = Visibility.Hidden;
@@ -689,6 +768,7 @@ namespace Themedit
         private void metroWindow_Closing(object sender, CancelEventArgs e)
         {
             SfbLibrary.Taskbar.WindowsTaskbar.Show();
+
         }
 
         private async void _mediaElement_KeyDown(object sender, KeyEventArgs e)
@@ -715,21 +795,21 @@ namespace Themedit
                         _timer.Stop();
                     }
 
-                    _mediaControlPanel.labelTitle.Content = $"Key pressed - SPACE - video is {_status} ";
+                    _mediaControls.labelTitle.Content = $"Key pressed - SPACE - video is {_status} ";
                     for (int i = 0; i < 5; i++)
                     {
                         await Task.Delay(1000);
-                        _mediaControlPanel.labelTitle.Content += $".";
+                        _mediaControls.labelTitle.Content += $".";
                     }
                     
-                    _mediaControlPanel.labelTitle.Content = _videoPath;
+                    _mediaControls.labelTitle.Content = _videoPath;
                     break;
                 case Key.Left:
                     if (_mediaElement.Position != TimeSpan.Zero)
                         if (e.IsToggled)
                         {
                             _mediaElement.Position -= TimeSpan.FromSeconds(10);
-                            _mediaControlPanel.labelTitle.Content = "Key left - Move video position -10sec - ";
+                            _mediaControls.labelTitle.Content = "Key left - Move video position -10sec - ";
                         }
                         else
                             _mediaElement.Position -= TimeSpan.FromSeconds(5);
@@ -765,8 +845,8 @@ namespace Themedit
             if (e.LeftButton == MouseButtonState.Pressed && Keyboard.Modifiers == ModifierKeys.Control)
             {
                 MovingObject = sender;
-                richTextBoxDrawContent(e.GetPosition(_mediaControlPanel as FrameworkElement).X + ":" + e.GetPosition(_mediaControlPanel as FrameworkElement).Y.ToString());
-                _movingObjectPosition = new Thickness(e.GetPosition(_mediaControlPanel as FrameworkElement).X, e.GetPosition(_mediaControlPanel as FrameworkElement).Y, 0, 0);
+                richTextBoxDrawContent(e.GetPosition(_mediaControls as FrameworkElement).X + ":" + e.GetPosition(_mediaControls as FrameworkElement).Y.ToString());
+                _movingObjectPosition = new Thickness(e.GetPosition(_mediaControls as FrameworkElement).X, e.GetPosition(_mediaControls as FrameworkElement).Y, 0, 0);
             }
         }
 
@@ -781,7 +861,7 @@ namespace Themedit
             {
                 if (e.LeftButton == MouseButtonState.Pressed && Keyboard.Modifiers == ModifierKeys.Control)
                 {
-                    _mediaControlPanel.Margin = new Thickness(
+                    _mediaControls.Margin = new Thickness(
                         e.GetPosition((MovingObject as FrameworkElement).Parent as FrameworkElement).X - _movingObjectPosition.Left,
                         e.GetPosition((MovingObject as FrameworkElement).Parent as FrameworkElement).Y - _movingObjectPosition.Top,
                         0,
@@ -832,18 +912,13 @@ namespace Themedit
         }
         public void ClearFocus(object sender)
         {
-            /*// Kill logical focus
-            FocusManager.SetFocusedElement(FocusManager.GetFocusScope((FrameworkElement)sender), null);
-            // Kill keyboard focus
-            Keyboard.ClearFocus();*/
-            // Move to a parent that can take focus
-            FrameworkElement parent = (FrameworkElement)_mediaControlPanel.Parent;
+            FrameworkElement parent = (FrameworkElement)_mediaControls.Parent;
             while (parent != null && parent is IInputElement && !((IInputElement)parent).Focusable)
             {
                 parent = (FrameworkElement)parent.Parent;
             }
 
-            DependencyObject scope = FocusManager.GetFocusScope(_mediaControlPanel);
+            DependencyObject scope = FocusManager.GetFocusScope(_mediaControls);
             FocusManager.SetFocusedElement(scope, parent as IInputElement);
         }
 
@@ -863,8 +938,6 @@ namespace Themedit
                 if (sender is MediaElement)
                 {
                     MediaElement element = (MediaElement)sender;
-                
-                    //element.Cursor = Cursors.Arrow;
                 }
             };
         }
@@ -877,12 +950,17 @@ namespace Themedit
         private void _mediaControlPanel_MouseEnter(object sender, MouseEventArgs e)
         {
             Cursor = Cursors.Arrow;
-            _mediaControlPanel.Opacity = 1;
+            _mediaControls.Opacity = 1;
         }
 
         private void _mediaControlPanel_MouseLeave(object sender, MouseEventArgs e)
         {
             
+        }
+
+        private void _metroWindow_Closed(object sender, EventArgs e)
+        {
+
         }
     }
     public enum ScreenOptions
@@ -930,6 +1008,22 @@ namespace Themedit
             }
             _sender = sender;
         }
+    }
+
+    public class PlayerEventArgs : RoutedEventArgs
+    {
+        public Uri Media { get; set; }
+        public PlayerActions Actions { get; set; }
+
+        public PlayerEventArgs()
+        {
+           
+        }
+    }
+
+    public enum PlayerActions
+    {
+        Play
     }
 
     public class VideoMovingEventArgs : EventArgs
