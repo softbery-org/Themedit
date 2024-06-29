@@ -1,4 +1,5 @@
-﻿_VERSION=`cat .sbver`
+﻿#!/bin/sh
+_VERSION="Version `cat .sbver`"
 echo ""
 echo "Geting files ..."
 echo ""
@@ -6,9 +7,9 @@ git add .
 sleep 3s
 echo ""
 echo ""
-echo "Commiting all files ...: Version $_VERSION"
+echo "Commiting all files ...: $_VERSION"
 echo ""
-git commit -m "Version $_VERSION"
+git commit -m "$_VERSION"
 sleep 3s
 echo ""
 echo ""
