@@ -1,6 +1,5 @@
-// Version: 1.0.0.1
+// Version: 1.0.0.46
 // Copyright (c) 2024 Softbery by Paweł Tobis
-using NAudio;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;

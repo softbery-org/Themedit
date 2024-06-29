@@ -1,4 +1,4 @@
-// Version: 1.0.0.118
+// Version: 1.0.0.163
 // Copyright (c) 2024 Softbery by Paweł Tobis
 using Microsoft.Win32;
 using System;
@@ -17,6 +17,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using System.Xaml;
+using Themedit.src;
 
 namespace Themedit
 {
@@ -25,16 +26,26 @@ namespace Themedit
     /// </summary>
     public partial class PlaylistWindow : Window
     {
-        public src.Playlist Playlist 
-        { 
-            get => MediaControls.Playlist; 
-        }
-
         private Window _window;
+
+        public static Action<Track> SelectOnListView;
 
         public PlaylistWindow()
         {
             InitializeComponent();
+            SelectOnListView += select;
+        }
+
+        private void select(Track track)
+        {
+            foreach (var item in _listView.Items)
+            {
+                var n = item.ToString();
+                if (n == track.Path)
+                {
+                    _listView.SelectedItem = item; break;
+                }
+            }
         }
 
         public PlaylistWindow(Window window) : this()
@@ -49,13 +60,41 @@ namespace Themedit
 
         public void AddMedia(string path)
         {
-            this.Playlist.AddTrack(path);
+            var t = new Track(path);
             _listView.Items.Add(path);
+            IList<Track> list = new List<Track>();
+            foreach (var track in _listView.Items)
+            {
+                var tr = new Track(track.ToString());
+                list.Add(tr);
+            }
+            MainWindow.SetPlaylist(list);
+            
+        }
+
+        public void AddMedia(string[] path)
+        {
+            var t = new List<Track>();
+            foreach (var item in path)
+            {
+                var track = new Track(item);
+                t.Add(track);
+                _listView.Items.Add(track.Path);
+            }
+            MainWindow.SetPlaylist(t);
         }
 
         public void RemoveMedia(string path) 
         {
-            this.Playlist.RemoveTrack(path);
+            foreach (var track in ((MainWindow)_window).Playlist)
+            {
+                if (track.Path == path)
+                {
+                    MainWindow.RemoveFromPlaylist(track);
+                    break;
+                }
+            }
+            
             _listView.Items.Remove(path);
         }
 
@@ -68,11 +107,7 @@ namespace Themedit
                          "All files (*.*)|*.*";
             if (ofd.ShowDialog() != null)
             {
-                foreach (var file in ofd.FileNames)
-                {
-                    this.Playlist.AddTrack(file);
-                    _listView.Items.Add(file);
-                }
+                AddMedia(ofd.FileNames);
             }
             else
             {
@@ -82,8 +117,12 @@ namespace Themedit
 
         private void _playlist_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            if (_listView.SelectedItem!=null)
+            if (_listView.SelectedItem != null)
+            {
+                ((MainWindow)_window).Playlist.SetCurrent(_listView.SelectedItem.ToString());
+                //MainWindow.PlayMedia(_listView.SelectedItem.ToString());
                 MainWindow.OnOpeningMedia(this, _listView.SelectedItem.ToString());
+            }
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -102,7 +141,7 @@ namespace Themedit
 
         private void BtnClrList_Click(object sender, RoutedEventArgs e)
         {
-            Playlist.ClearTracks();
+            ((MainWindow)_window).Playlist.Tracks.Clear();
             _listView.Items.Clear();
         }
     }

@@ -1,4 +1,4 @@
-// Version: 1.0.0.1
+// Version: 1.0.0.46
 // Copyright (c) 2024 Softbery by Paweł Tobis
 using System;
 using System.Collections.Generic;
@@ -57,8 +57,8 @@ namespace Themedit.src
             }
             catch (Exception e)
             {
-                /*MessageBox.Show(e.GetType().Name + "\n\n" + e.Message + "\n\n" + e,
-                    Application.ProductName, MessageBoxButtons.OK, MessageBoxIcon.Error);*/
+                MessageBox.Show(e.GetType().Name + "\n\n" + e.Message + "\n\n" + e,
+                    Application.ResourceAssembly.FullName, System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
             }
         }
 
@@ -82,8 +82,8 @@ namespace Themedit.src
             }
             catch (Exception e)
             {
-                /*MessageBox.Show(e.GetType().Name + "\n\n" + e.Message + "\n\n" + e,
-                    Application.ProductName, MessageBoxButtons.OK, MessageBoxIcon.Error);*/
+                MessageBox.Show(e.GetType().Name + "\n\n" + e.Message + "\n\n" + e,
+                    Application.ResourceAssembly.FullName, System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
             }
         }
 
@@ -151,8 +151,8 @@ namespace Themedit.src
             }
             catch (Exception e)
             {
-                return MsgResult.Ignore;//(MsgResult)MessageBox.Show(e.GetType().Name + "\n\n" + e.Message + "\n\n" + e,
-                    //Application.ProductName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return (MsgResult)MessageBox.Show(e.GetType().Name + "\n\n" + e.Message + "\n\n" + e,
+                    Application.ResourceAssembly.FullName, System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
             }
         }
     }

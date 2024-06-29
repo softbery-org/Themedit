@@ -1,6 +1,7 @@
-// Version: 1.0.0.12
+// Version: 1.0.0.57
 // Copyright (c) 2024 Softbery by Paweł Tobis
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -11,7 +12,7 @@ using System.Windows.Shapes;
 
 namespace Themedit.src
 {
-    public class Playlist
+    public class Playlist : IEnumerable<Track>
     {
         public string Name { get; private set; } = "Playlist";
         public string Description { get; private set; } = String.Empty;
@@ -21,6 +22,11 @@ namespace Themedit.src
         public Playlist() 
         { 
             
+        }
+
+        public void GetCurrentTrack(string name)
+        {
+
         }
 
         public Playlist(Track[] tracks) : this()
@@ -131,6 +137,16 @@ namespace Themedit.src
 
             }
             return 0; 
+        }
+
+        public IEnumerator<Track> GetEnumerator()
+        {
+            return TracksList.GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return TracksList.GetEnumerator();
         }
     }
 

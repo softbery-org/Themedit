@@ -504,5 +504,21 @@
                     Kind="SkipNext" />
             </StackPanel>
         </Button>
+        <Button
+            x:Name="btnPlaylistRepeater"
+            Width="30"
+            Height="30"
+            Margin="216,32,0,0"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Top"
+            TabIndex="8"
+            ToolTip="Repeat all track" Click="btnPlaylistRepeater_Click">
+            <StackPanel HorizontalAlignment="Left" VerticalAlignment="Top">
+                <iconPacks:PackIconMaterialDesign
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Top"
+                    Kind="RepeatOn" />
+            </StackPanel>
+        </Button>
     </Grid>
 </UserControl>

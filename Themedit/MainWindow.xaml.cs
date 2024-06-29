@@ -1,4 +1,4 @@
-// Version: 1.0.0.181
+// Version: 1.0.0.225
 // Copyright (c) 2024 Softbery by Pawe� Tobis
 using MahApps.Metro.Controls;
 using Microsoft.Win32;
@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
+using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -17,6 +18,7 @@ using System.Windows.Media.Animation;
 using System.Windows.Threading;
 using Themedit.src;
 using Themedit.Subtitles;
+using ZM.Media.Info;
 
 namespace Themedit
 {
@@ -38,6 +40,8 @@ namespace Themedit
         private bool _subtitlesShow = true;
         private bool _mediaElementEnd;
         private bool _isMediaElementSelected = true;
+
+        public MediaPlaylist Playlist { get; private set; }
 
         /// <summary>
         /// Url to this application repository.
@@ -72,6 +76,10 @@ namespace Themedit
         public double WaitTime { get; set; } = 5;
 
         public static Action<object, string> OnOpeningMedia;
+        public static Action<string> PlayMedia;
+        public static Action<IList<Track>> SetPlaylist;
+        public static Action<Track> RemoveFromPlaylist;
+        public static Action<Track> SetCurrent;
 
         /// <summary>
         /// Constructor
@@ -91,13 +99,41 @@ namespace Themedit
             PictogramViewer(PictogramAction.Hide);
 
             labelTimerColorSet(Brushes.Red);
-            
+
+            Playlist = new MediaPlaylist();
+
             _textBoxUrl.Visibility = Visibility.Hidden;
             _lblSubtitles.Content = String.Empty;
             _mediaControls.MWindow = this;
             _mediaElement.MediaEnded += _mediaElement_MediaEnded;
 
             OnOpeningMedia += open;
+            PlayMedia += play;
+            SetPlaylist += set;
+            RemoveFromPlaylist += remove;
+            SetCurrent += set;
+        }
+
+        private void remove(Track track)
+        {
+            Playlist.Remove(track);
+        }
+
+        private void set(Track track)
+        {
+            if (Playlist.Tracks.Contains(track))
+            {
+                Playlist.SetCurrent(track.Path);
+            }
+        }
+
+        private void set(IList<Track> tracks)
+        {
+            Playlist.Tracks.Clear();
+            foreach (var track in tracks)
+            {
+                Playlist.Tracks.Add(track);
+            }
         }
 
         private void open(object sender, string e = "")
@@ -116,6 +152,7 @@ namespace Themedit
                         }
                     }
 
+                    Playlist.SetCurrent(e);
                     _mediaElement.Source = new Uri(e);
                     _mediaElement.Stop();
                     _mediaElement.Play();
@@ -123,6 +160,64 @@ namespace Themedit
                     _mediaControls.labelTitle.Content = e;
                     _videoPath = e;
                     _timer.Stop();
+                    _timer.Start();
+                    _lblTask.Content = Playlist.Current.Name;
+                    DelayAsync(10000);
+                }
+            }
+        }
+
+        private void play(string trackName)
+        {
+            if (_mediaElement != null)
+            {
+                foreach (var track in Playlist.Tracks)
+                {
+                    if (track.Name==trackName)
+                    {
+                        Playlist.SetCurrent(Playlist.Tracks.IndexOf(track));
+                        _timer.Stop();
+                        _mediaElement.Source = new Uri(track.Path);
+                        _mediaElement.Play();
+                        _status = MediaElementStatus.Playing;
+                        _timer.Start();
+                    }
+                }
+            }
+        }
+
+        private void play(Track track)
+        {
+            if (_mediaElement != null)
+            {
+                if (Playlist.Tracks.Contains(track))
+                {
+                    Playlist.SetCurrent(Playlist.Tracks.IndexOf(track));
+                    _timer.Stop();
+                    _mediaElement.Source = new Uri(Playlist.Current.Path);
+                    _mediaElement.Play();
+                    _status = MediaElementStatus.Playing;
+                    _mediaControls.labelTitle.Content = track.Path;
+                    _videoPath = track.Path;
+                    _timer.Start();
+                }
+            }
+        }
+
+        private void play(int id)
+        {
+            if (_mediaElement != null)
+            {
+                if (Playlist.Tracks[id]!=null)
+                {
+                    var track = Playlist.Tracks[id];
+                    Playlist.SetCurrent(Playlist.Tracks.IndexOf(track));
+                    _timer.Stop();
+                    _mediaElement.Source = new Uri(Playlist.Current.Path);
+                    _mediaElement.Play();
+                    _status = MediaElementStatus.Playing;
+                    _mediaControls.labelTitle.Content = Playlist.Current.Path;
+                    _videoPath = Playlist.Current.Path;
                     _timer.Start();
                 }
             }
@@ -360,6 +455,7 @@ namespace Themedit
         private async void DelayAsync(int ms)
         {
             await Task.Delay(ms);
+            _lblTask.Content = String.Empty;
         }
 
         private void BtnPause_Click(object sender, RoutedEventArgs e)
@@ -440,18 +536,6 @@ namespace Themedit
             {
                 try
                 {
-
-                    try
-                    {
-                        var mi = new MediaInfo(_videoPath);
-                        var c = mi.GetInfo(MediaInfoStreamKind.Video, 0, null);
-                        richTextBoxDrawContent(c);
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show(ex.Message);
-                    }
-
                     if (_mediaElement != null)
                         _mediaElement.Stop();
 
@@ -518,7 +602,7 @@ namespace Themedit
             FullscreenMode();
         }
 
-        private void FullscreenMode(bool on_off = false)
+        private void FullscreenMode()
         {
             if (_fullscreen)
             {
@@ -693,8 +777,6 @@ namespace Themedit
             devices.MouseMove += Hook_mouse_MouseMove;
             devices.MouseHover += Hook_mouse_MouseHover;
 
-            _mediaElement.MediaEnded += _mediaElement_MediaEnded;
-
             Loaded -= MetroWindow_OnLoaded;
         }
 
@@ -704,7 +786,21 @@ namespace Themedit
         {
             if (_mediaElement != null)
             {
-                
+                if (Playlist.GetNext() != null)
+                {
+                    Playlist.SetCurrent(Playlist.GetNext().Path);
+                    PlaylistWindow.SelectOnListView(Playlist.Current);
+                    _mediaElement.Source = new Uri(Playlist.Current.Path);
+                    _mediaElement.Play();
+                    _mediaControls.labelTitle.Content = Playlist.Current.Path;
+                    _status = MediaElementStatus.Playing;
+                    Playlist.SetCurrent(Playlist.Current.Path);
+                    _videoPath = Playlist.Current.Path;
+                    _timer.Stop();
+                    _timer.Start();
+                    _lblTask.Content = Playlist.Current.Name;
+                    DelayAsync(10000); 
+                }
             }
         }
 
@@ -718,7 +814,7 @@ namespace Themedit
             _mouseNotMoveTimer.Stop();
 
             ShowControls();
-            _lblTask.Content = mouseStruct.pt.x + ":" + mouseStruct.pt.y;
+            //_lblTask.Content = mouseStruct.pt.x + ":" + mouseStruct.pt.y;
 
             _mouseNotMoveTimer.Start();
         }
@@ -771,9 +867,21 @@ namespace Themedit
 
         }
 
+        private int _escHowManyPress = 0;
+
         private async void _mediaElement_KeyDown(object sender, KeyEventArgs e)
         {
             richTextBoxDrawContent(sender.GetType().Name);
+
+            if (e.Key == Key.Escape)
+            {
+                _escHowManyPress++;
+            }
+            else
+            {
+                _escHowManyPress = 0;
+            }
+
             switch (e.Key)
             {
                 case Key.Enter:
@@ -830,6 +938,16 @@ namespace Themedit
                 case Key.Down:
                     break;
                 case Key.Escape:
+                    if (_escHowManyPress==1)
+                    {
+                        ClearFocus(sender);
+                    }
+                    if (_escHowManyPress==2)
+                    {
+                        _fullscreen = true;
+                        FullscreenMode();
+                        _escHowManyPress = 0;
+                    }
                     break;
                 case Key.F11:
                     FullscreenMode();

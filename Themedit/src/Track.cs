@@ -1,4 +1,4 @@
-// Version: 1.0.0.3
+// Version: 1.0.0.48
 // Copyright (c) 2024 Softbery by Paweł Tobis
 using System;
 using System.Collections.Generic;
@@ -14,7 +14,6 @@ namespace Themedit.src
     {
         private int _id = 0;
         private string _name;
-        private MediaInfo _mediaInfo;
 
         /// <summary>
         /// Track id
@@ -38,7 +37,7 @@ namespace Themedit.src
         /// <summary>
         /// Track time
         /// </summary>
-        public TimeSpan Time { get; set; }
+        public TimeSpan Time { get => GetTime(); }
 
         /// <summary>
         /// 
@@ -56,11 +55,11 @@ namespace Themedit.src
                 _id++;
             }
         }
-        public TimeSpan? GetTime()
+        public TimeSpan GetTime()
         {
-            _mediaInfo = new MediaInfo(Path);
-            _mediaInfo.GetInfo(MediaInfoStreamKind.Video, 0, null);
-            return null;
+            var m = new MediaElement();
+            m.Source = new Uri(this.Path);
+            return m.NaturalDuration.TimeSpan;
         }
     }
 }

@@ -1,4 +1,4 @@
-// Version: 1.0.0.181
+// Version: 1.0.0.221
 // Copyright (c) 2024 Softbery by Pawe� Tobis
 
 // Version: 1.0.0.79
@@ -27,13 +27,16 @@ namespace Themedit
     /// </summary>
     public partial class MediaControls : UserControl
     {
+        public delegate void dlgPlaylistHandle(ref string track);
+
         private PlaylistWindow _playlist;
+        private MediaPlaylist _mediaPlaylist;
         private IList<IPlugin> _plugins;
         private IList<IPlugin> _runnedPlugins = new List<IPlugin>();
         private FileSystemWatcher _fsw;
         private Window _window;
 
-        public static src.Playlist Playlist { get; private set; }
+        public MediaPlaylist Playlist { get => _mediaPlaylist; }
 
         public Window MWindow
         {
@@ -61,8 +64,6 @@ namespace Themedit
             _fsw.Deleted += _fsw_Deleted;
             _fsw.Renamed += _fsw_Renamed;
             _fsw.Created += _fsw_Created;*/
-            Playlist = new src.Playlist();
-
             _plugins = Plugin.LoadPlugins();
 
             foreach (var plugin in _plugins)
@@ -70,6 +71,11 @@ namespace Themedit
                 _comboboxPlugins.Items.Add(plugin.PluginName);
             }
             //_fsw.EnableRaisingEvents = true;
+        }
+
+        public MediaControls(MediaPlaylist playlist) : this()
+        {
+            _mediaPlaylist = playlist;
         }
 
         /*private void _fsw_Created(object sender, FileSystemEventArgs e)
@@ -156,7 +162,6 @@ namespace Themedit
 
         private void btnPlaylist_Click(object sender, RoutedEventArgs e)
         {
-
             if (_playlist != null)
             {
                 _playlist.Show();
@@ -224,6 +229,32 @@ namespace Themedit
         }
 
         private void btnNext_Click(object sender, RoutedEventArgs e)
+        {
+            
+        }
+
+        private void btnPlaylistRepeater_Click(object sender, RoutedEventArgs e)
+        {
+            
+        }
+    }
+
+    public class PlaylistEventArgs : RoutedEventArgs
+    {
+        public IList<Track> Tracks { get; set; }
+        public Track CurrentTrack { get; set; }
+        public event Action<string> PlayTrack;
+        public event Action<string> NextTrack;
+        public event Action<string> PreviouseTrack;
+        public event Action<string> GetCurrentTrack;
+
+        public PlaylistEventArgs(Playlist playlist)
+        {
+            Tracks = playlist.TracksList;
+            PlayTrack += PlaylistEventArgs_PlayTrack;
+        }
+
+        private void PlaylistEventArgs_PlayTrack(string obj)
         {
             
         }
