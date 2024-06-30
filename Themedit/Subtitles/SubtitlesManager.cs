@@ -1,4 +1,4 @@
-// Version: 1.0.0.226
+// Version: 1.0.0.233
 // Copyright (c) 2024 Softbery by Paweł Tobis
 using Player.Subtiles;
 using System;
@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace Themedit.Subtitles
@@ -93,7 +94,7 @@ namespace Themedit.Subtitles
         public SubtitlesManager(string path)
         {
             _subtitlesFile = path;
-            readSRT(path);
+            readSrtRegex(path);
         }
 
         /// <summary>
@@ -125,42 +126,28 @@ namespace Themedit.Subtitles
             return dic;
         }
 
-        private void readSRT(string path)
+        private void readSrtRegex(string path)
         {
             var file = new FileInfo(path);
             if (file.Exists)
             {
-                var read = File.ReadAllLines(file.FullName);
+                var read = File.ReadAllText(file.FullName, Encoding.Default);
+                Regex regex = new Regex(@"^\s*(\d+:\d+:\d+,\d+)[^\S\n]+-->[^\S\n]+(\d+:\d+:\d+,\d+)((?:\n(?!\d+:\d+:\d+,\d+\b|\n+\d+$).*)*)", RegexOptions.Multiline);
+                var matches = regex.Matches(read);
 
-                for (int j = 0; j < read.Length - 1; j++)
+                int i = 1;
+                foreach (Match match in matches)
                 {
-                    var strsub = new SrtSub();
-                    strsub.Id = Convert.ToInt32(read[j]);
-                    var split = read[j + 1].Replace("-->", "|");
-                    var splits = split.Split('|');
+                    var srtsub = new SrtSub();
+                    srtsub.Id = i;
+                    srtsub.StartTime = TimeSpan.Parse(match.Groups[1].Value);
+                    srtsub.EndTime = TimeSpan.Parse(match.Groups[2].Value);
+                    srtsub.Text = new List<string>();
+                    var split = match.Groups[3].Value.Split('\n');
+                    srtsub.Text.AddRange(split);
 
-                    strsub.StartTime = TimeSpan.Parse(splits[0].Replace(" ", ""));
-                    strsub.EndTime = TimeSpan.Parse(splits[1].Replace(" ", ""));
-
-                    strsub.Text = new List<string>();
-
-                    var i = j + 2;
-
-                    while (true)
-                    {
-                        if (read[i] != "")
-                        {
-                            strsub.Text.Add(read[i]);
-                            i++;
-                        }
-                        else
-                        {
-                            j = i;
-                            break;
-                        }
-                    }
-
-                    this._subtitles.Add(strsub.Id, strsub);
+                    this._subtitles.Add(srtsub.Id, srtsub);
+                    i++;
                 }
             }
         }

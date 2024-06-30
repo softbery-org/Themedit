@@ -1,4 +1,4 @@
-// Version: 1.0.0.225
+// Version: 1.0.0.232
 // Copyright (c) 2024 Softbery by Pawe� Tobis
 using MahApps.Metro.Controls;
 using Microsoft.Win32;
