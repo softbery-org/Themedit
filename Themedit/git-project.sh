@@ -1,4 +1,4 @@
-﻿#!/bin/sh
+﻿#!/bin/bash
 _VERSION="Version `cat .sbver`"
 echo ""
 echo "Geting files ..."
