@@ -297,15 +297,25 @@
       <DependentUpon>PlaylistWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="PlayerInfo.cs" />
+    <Compile Include="SettingsWindow.xaml.cs">
+      <DependentUpon>SettingsWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="src\AppHelp.cs" />
     <Compile Include="src\AutoUpdate.cs" />
+    <Compile Include="src\Database.cs" />
     <Compile Include="src\MediaPlaylist.cs" />
     <Compile Include="src\Playlist.cs" />
     <Compile Include="src\RegistryHelp.cs" />
+    <Compile Include="src\Scripts\SQLStaticReader.cs" />
     <Compile Include="src\TaskDialog.cs" />
     <Compile Include="src\Track.cs" />
     <Compile Include="src\TrackerList.cs" />
     <Compile Include="TaskLabel.cs" />
+    <Compile Include="themeditDataSet.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>themeditDataSet.xsd</DependentUpon>
+    </Compile>
     <Compile Include="ThemeEditorWindow.xaml.cs">
       <DependentUpon>ThemeEditorWindow.xaml</DependentUpon>
     </Compile>
@@ -318,6 +328,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="PlaylistWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="SettingsWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -380,8 +394,9 @@
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <None Include="config\cfg.ini">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="config\playlist.ini" />
     <None Include="Git-Project.sh" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
@@ -389,6 +404,17 @@
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
     <None Include="Themedit.licenseheader" />
+    <None Include="themeditDataSet.xsc">
+      <DependentUpon>themeditDataSet.xsd</DependentUpon>
+    </None>
+    <None Include="themeditDataSet.xsd">
+      <Generator>MSDataSetGenerator</Generator>
+      <LastGenOutput>themeditDataSet.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="themeditDataSet.xss">
+      <DependentUpon>themeditDataSet.xsd</DependentUpon>
+    </None>
     <None Include="Themedit_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>
@@ -409,6 +435,10 @@
     <ProjectReference Include="..\SfbLibrary\SfbLibrary.csproj">
       <Project>{8ad4ca61-d0c7-4b25-bfdf-7de3cf427b91}</Project>
       <Name>SfbLibrary</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ThemeditLanguage\ThemeditLanguage.csproj">
+      <Project>{db49ded3-ea73-468b-b6ea-591bb14ebcf0}</Project>
+      <Name>ThemeditLanguage</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
@@ -432,7 +462,18 @@
       <Install>false</Install>
     </BootstrapperPackage>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Content Include="src\Scripts\Update.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="themedit.mdf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="themedit_log.ldf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <DependentUpon>themedit.mdf</DependentUpon>
+    </Content>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\Microsoft.VisualStudio.Threading.Analyzers.17.10.48\build\Microsoft.VisualStudio.Threading.Analyzers.targets" Condition="Exists('..\packages\Microsoft.VisualStudio.Threading.Analyzers.17.10.48\build\Microsoft.VisualStudio.Threading.Analyzers.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

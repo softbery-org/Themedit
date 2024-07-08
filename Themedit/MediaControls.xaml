@@ -56,7 +56,7 @@
                 Height="26"
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center"
-                Content="Multimedia file name"
+                Content=""
                 FontFamily="Calibri"
                 FontSize="14"
                 FontWeight="Bold"
@@ -66,6 +66,7 @@
                 </Label.Effect>
             </Label>
             <Label
+                x:Name="labelSubtitles_Txt"
                 Grid.RowSpan="2"
                 Grid.Column="5"
                 Width="50"
@@ -73,7 +74,7 @@
                 Margin="35,2,0,0"
                 HorizontalAlignment="Left"
                 VerticalAlignment="Top"
-                Content="Napisy:"
+                Content="{DynamicResource labelSubtitles_Txt.Content}"
                 FontFamily="Calibri"
                 FontWeight="Bold"
                 RenderTransformOrigin="0.5,0.5">
@@ -90,7 +91,7 @@
                 Margin="77,2,0,0"
                 HorizontalAlignment="Left"
                 VerticalAlignment="Top"
-                Content="--"
+                Content="{DynamicResource labelSubtilesOnOff.Content}"
                 FontFamily="Calibri"
                 FontWeight="Bold"
                 Foreground="#FF1FFF00"
@@ -113,7 +114,7 @@
                 FontSize="12"
                 FontWeight="Bold"
                 TabIndex="16"
-                ToolTip="Close player">
+                ToolTip="{DynamicResource btnClose.ToolTip}">
                 <StackPanel>
                     <iconPacks:PackIconMaterialDesign
                         HorizontalAlignment="Center"
@@ -189,7 +190,7 @@
                     </RichTextBox.Template>
                     <FlowDocument>
                         <Paragraph>
-                            <Run Text="Logi aplikacji." />
+                            <Run Text="{DynamicResource logRichTextBox.Text}" />
                         </Paragraph>
                     </FlowDocument>
                 </RichTextBox>
@@ -232,7 +233,7 @@
                 HorizontalAlignment="Left"
                 VerticalAlignment="Top"
                 TabIndex="5"
-                ToolTip="Prewious">
+                ToolTip="{DynamicResource btnPrevious.ToolTip}">
                 <StackPanel HorizontalAlignment="Left" VerticalAlignment="Top">
                     <iconPacks:PackIconMaterialDesign
                         HorizontalAlignment="Left"
@@ -250,7 +251,7 @@
             VerticalAlignment="Top"
             Click="btnPlay_Click"
             TabIndex="1"
-            ToolTip="Play">
+            ToolTip="{DynamicResource btnPlay.ToolTip}">
             <StackPanel HorizontalAlignment="Left" VerticalAlignment="Top">
                 <iconPacks:PackIconMaterialDesign
                     HorizontalAlignment="Left"
@@ -267,7 +268,7 @@
             VerticalAlignment="Top"
             Click="btnStop_Click"
             TabIndex="2"
-            ToolTip="Stop">
+            ToolTip="{DynamicResource btnStop.ToolTip}">
             <StackPanel HorizontalAlignment="Left" VerticalAlignment="Top">
                 <iconPacks:PackIconMaterialDesign
                     HorizontalAlignment="Left"
@@ -284,7 +285,7 @@
             VerticalAlignment="Top"
             Click="btnPause_Click"
             TabIndex="3"
-            ToolTip="Pause">
+            ToolTip="{DynamicResource btnPause.ToolTip}">
             <StackPanel HorizontalAlignment="Left" VerticalAlignment="Top">
                 <iconPacks:PackIconMaterialDesign
                     HorizontalAlignment="Left"
@@ -300,7 +301,7 @@
             HorizontalAlignment="Left"
             VerticalAlignment="Top"
             TabIndex="4"
-            ToolTip="Rewind">
+            ToolTip="{DynamicResource btnRewind.ToolTip}">
             <StackPanel HorizontalAlignment="Left" VerticalAlignment="Top">
                 <iconPacks:PackIconMaterialDesign
                     HorizontalAlignment="Left"
@@ -316,7 +317,7 @@
             HorizontalAlignment="Left"
             VerticalAlignment="Top"
             TabIndex="5"
-            ToolTip="Forward">
+            ToolTip="{DynamicResource btnForward.ToolTip}">
             <StackPanel HorizontalAlignment="Left" VerticalAlignment="Top">
                 <iconPacks:PackIconMaterialDesign
                     HorizontalAlignment="Left"
@@ -332,7 +333,7 @@
             HorizontalAlignment="Left"
             VerticalAlignment="Top"
             TabIndex="13"
-            ToolTip="On/Off fullscreen">
+            ToolTip="{DynamicResource btnFullscreen.ToolTip}">
             <StackPanel HorizontalAlignment="Left" VerticalAlignment="Top">
                 <iconPacks:PackIconMaterialDesign
                     HorizontalAlignment="Left"
@@ -348,7 +349,7 @@
             HorizontalAlignment="Left"
             VerticalAlignment="Top"
             TabIndex="7"
-            ToolTip="Open subtitle file">
+            ToolTip="{DynamicResource btnSubtitles.ToolTip}">
             <StackPanel HorizontalAlignment="Left" VerticalAlignment="Top">
                 <iconPacks:PackIconMaterialDesign
                     HorizontalAlignment="Left"
@@ -364,7 +365,7 @@
             HorizontalAlignment="Left"
             VerticalAlignment="Top"
             TabIndex="11"
-            ToolTip="Volume up">
+            ToolTip="{DynamicResource btnVolumeUp.ToolTip}">
             <StackPanel HorizontalAlignment="Left" VerticalAlignment="Top">
                 <iconPacks:PackIconMaterialDesign
                     HorizontalAlignment="Left"
@@ -380,7 +381,7 @@
             HorizontalAlignment="Left"
             VerticalAlignment="Top"
             TabIndex="10"
-            ToolTip="Volume down">
+            ToolTip="{DynamicResource btnVolumeDown.ToolTip}">
             <StackPanel HorizontalAlignment="Left" VerticalAlignment="Top">
                 <iconPacks:PackIconMaterialDesign
                     HorizontalAlignment="Left"
@@ -396,7 +397,7 @@
             HorizontalAlignment="Left"
             VerticalAlignment="Top"
             TabIndex="12"
-            ToolTip="Mute media">
+            ToolTip="{DynamicResource btnMute.ToolTip}">
             <StackPanel HorizontalAlignment="Left" VerticalAlignment="Top">
                 <iconPacks:PackIconMaterialDesign
                     HorizontalAlignment="Left"
@@ -413,7 +414,7 @@
             VerticalAlignment="Top"
             Click="btnSettings_Click"
             TabIndex="15"
-            ToolTip="Open settings">
+            ToolTip="{DynamicResource btnSettings.ToolTip}">
             <StackPanel HorizontalAlignment="Left" VerticalAlignment="Top">
                 <iconPacks:PackIconMaterialDesign
                     HorizontalAlignment="Left"
@@ -430,7 +431,7 @@
             VerticalAlignment="Top"
             Click="btnOpen_Click"
             TabIndex="6"
-            ToolTip="Open media file">
+            ToolTip="{DynamicResource btnOpen.ToolTip}">
             <StackPanel HorizontalAlignment="Left" VerticalAlignment="Top">
                 <iconPacks:PackIconMaterialDesign
                     HorizontalAlignment="Left"
@@ -447,7 +448,7 @@
             VerticalAlignment="Top"
             Click="btnPlaylist_Click"
             TabIndex="8"
-            ToolTip="Open playlist">
+            ToolTip="{DynamicResource btnPlaylist.ToolTip}">
             <StackPanel HorizontalAlignment="Left" VerticalAlignment="Top">
                 <iconPacks:PackIconMaterialDesign
                     HorizontalAlignment="Left"
@@ -463,7 +464,7 @@
             HorizontalAlignment="Left"
             VerticalAlignment="Top"
             TabIndex="9"
-            ToolTip="Open url">
+            ToolTip="{DynamicResource btnUrl.ToolTip}">
             <StackPanel HorizontalAlignment="Left" VerticalAlignment="Top">
                 <iconPacks:PackIconMaterialDesign
                     HorizontalAlignment="Left"
@@ -479,7 +480,7 @@
             HorizontalAlignment="Left"
             VerticalAlignment="Top"
             TabIndex="14"
-            ToolTip="Show/Hide subtitles">
+            ToolTip="{DynamicResource btnSubtitlesOnOff.ToolTip}">
             <StackPanel HorizontalAlignment="Left" VerticalAlignment="Top">
                 <iconPacks:PackIconMaterialDesign
                     HorizontalAlignment="Left"
@@ -496,7 +497,7 @@
             VerticalAlignment="Top"
             Click="btnNext_Click"
             TabIndex="5"
-            ToolTip="Next">
+            ToolTip="{DynamicResource btnPlaylistNext.ToolTip}">
             <StackPanel HorizontalAlignment="Left" VerticalAlignment="Top">
                 <iconPacks:PackIconMaterialDesign
                     HorizontalAlignment="Left"
@@ -511,8 +512,9 @@
             Margin="216,32,0,0"
             HorizontalAlignment="Left"
             VerticalAlignment="Top"
+            Click="btnPlaylistRepeater_Click"
             TabIndex="8"
-            ToolTip="Repeat all track" Click="btnPlaylistRepeater_Click">
+            ToolTip="{DynamicResource btnPlaylistRepeater.ToolTip}">
             <StackPanel HorizontalAlignment="Left" VerticalAlignment="Top">
                 <iconPacks:PackIconMaterialDesign
                     HorizontalAlignment="Left"

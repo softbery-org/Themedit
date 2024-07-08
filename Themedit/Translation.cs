@@ -1,6 +1,6 @@
-// Version: 1.0.0.166
+// Version: 1.0.0.285
 // Copyright (c) 2024 Softbery by Paweł Tobis
-using SfbLibrary.Languages;
+using ThemeditLanguage;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,7 +12,7 @@ namespace Themedit
 {
     internal static class Translation
     {
-        public static ILanguage Controls { get; private set; }
+        public static ILanguage Current { get; private set; }
         public static IList<ILanguage> Languages { get; private set; } = new List<ILanguage>();
 
         private static bool checkVersion(ILanguage language, PlayerInfo player_info)
@@ -24,45 +24,60 @@ namespace Themedit
             return false;
         }
 
-        public static void ChangeLanguage(string language)
+        public static void ChangeLanguage(string language_code)
         {
             foreach (var item in Languages)
             {
-                if (item.Name == language && checkVersion(item, new PlayerInfo()))
+                if (item.Code == language_code && checkVersion(item, new PlayerInfo()))
                 {
-                    Controls = item.UseLanguage() as ILanguage;
+                    Current = item.UseLanguage() as ILanguage;
                 }
             }
         }
 
-        public static void ChangeLanguage(this object obj, string language = null)
+        public static void ChangeLanguage(ILanguage language)
         {
-            if (language != null)
-            {
-                ChangeLanguage(language);
-            }
-            var control = obj as Control;
             
-            control.InvalidateVisual();
+            foreach (var item in Languages)
+            {
+                if (item == language && checkVersion(item, new PlayerInfo()))
+                {
+                    Current = item.UseLanguage() as ILanguage;
+                }
+            }
+        }
+
+        public static void ChangeLanguage(this object obj, string language_code)
+        {
+            if (language_code != null)
+            {
+                ChangeLanguage(language_code);
+            }
+        }
+
+        public static IList<ILanguage> GetLanguages()
+        {
+            return Languages;
         }
 
         public static ILanguage GetCurrentLanguage()
         {
-            if (Controls != null)
-                return Controls;
+            if (Current != null)
+                return Current;
             else
                 return null;
         }
 
-        public static void SetLanguage(string lang)
+        public static void SetLanguage(string language_code)
         {
             var languages = Language.LoadLanguages();
+            Languages = languages;
 
-            foreach (var language in languages)
+            foreach (var lang in languages)
             {
-                if (language.Name == lang)
+                if (lang.Code == language_code)
                 {
-                    Controls = language as ILanguage;
+                    Current = lang as ILanguage;
                 }
             }
         }

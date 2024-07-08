@@ -1,4 +1,4 @@
-// Version: 1.0.0.170
+// Version: 1.0.0.307
 // Copyright (c) 2024 Softbery by Paweł Tobis
 using Microsoft.Win32;
 using System;
@@ -29,11 +29,42 @@ namespace Themedit
         private Window _window;
 
         public static Action<Track> SelectOnListView;
+        public static Action<Track[]> LoadUserSetting;
+        public static Action OnLanguageChange;
 
         public PlaylistWindow()
         {
             InitializeComponent();
             SelectOnListView += select;
+            LoadUserSetting += load;
+
+            OnLanguageChange += LanguageChange;
+            translate();
+        }
+
+        private void LanguageChange()
+        {
+            translate();
+        }
+
+        private void translate()
+        {
+            var language = Translation.Current;
+
+            this.Resources["Id.Header"] = language.Playlist.id;
+            this.Resources["Name.Header"] = language.Playlist.name;
+            this.Resources["Path.Header"] = language.Playlist.path;
+            this.Resources["Time.Header"] = language.Playlist.time;
+            this.Resources["btnAddMedia.Content"] = language.Playlist.btnAddMedia;
+            this.Resources["btnRemMedia.Content"] = language.Playlist.btnRemMedia;
+            this.Resources["btnClrList.Content"] = language.Playlist.btnClrList;
+            this.Resources["btnClose.Content"] = language.Playlist.btnClose;
+        }
+
+        private void load(Track[] track)
+        {
+            _listView.Items.Clear();
+            _listView.ItemsSource = track.ToList();
         }
 
         private void select(Track track)
@@ -61,7 +92,7 @@ namespace Themedit
         public void AddMedia(string path)
         {
             var t = new Track(path);
-            _listView.Items.Add(path);
+            _listView.Items.Add(t);
             IList<Track> list = new List<Track>();
             foreach (var track in _listView.Items)
             {
@@ -79,7 +110,7 @@ namespace Themedit
             {
                 var track = new Track(item);
                 t.Add(track);
-                _listView.Items.Add(track.Path);
+                _listView.Items.Add(track);
             }
             MainWindow.SetPlaylist(t);
         }
@@ -107,7 +138,14 @@ namespace Themedit
                          "All files (*.*)|*.*";
             if (ofd.ShowDialog() != null)
             {
-                AddMedia(ofd.FileNames);
+                try 
+                { 
+                    AddMedia(ofd.FileNames);
+                }
+                catch(Exception ex)
+                {
+                    MessageBox.Show($"[{Translation.Current.ExceptionsMessage.Msg0006.Replace("Translation.Current.ExceptionsMessage.","")}]: {Translation.Current.ExceptionsMessage.Msg0006} \n\nException:\n{ex.Message}");
+                }
             }
             else
             {
@@ -119,9 +157,8 @@ namespace Themedit
         {
             if (_listView.SelectedItem != null)
             {
-                ((MainWindow)_window).Playlist.SetCurrent(_listView.SelectedItem.ToString());
-                //MainWindow.PlayMedia(_listView.SelectedItem.ToString());
-                MainWindow.OnOpeningMedia(this, _listView.SelectedItem.ToString());
+                ((MainWindow)_window).Playlist.SetCurrent((_listView.SelectedItem as Track).Path);
+                MainWindow.OnOpeningMedia(this, (_listView.SelectedItem as Track).Path);
             }
         }
 

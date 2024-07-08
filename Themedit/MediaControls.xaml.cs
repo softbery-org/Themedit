@@ -1,4 +1,4 @@
-// Version: 1.0.0.228
+// Version: 1.0.0.365
 // Copyright (c) 2024 Softbery by Pawe� Tobis
 
 // Version: 1.0.0.79
@@ -19,6 +19,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Themedit.src;
+using ThemeditLanguage;
 
 namespace Themedit
 {
@@ -27,8 +28,11 @@ namespace Themedit
     /// </summary>
     public partial class MediaControls : UserControl
     {
+        public delegate void dlgChangeLanguageHandler();
         public delegate void dlgPlaylistHandle(ref string track);
 
+
+        public static Action OnLanguageChange;
         private PlaylistWindow _playlist;
         private MediaPlaylist _mediaPlaylist;
         private IList<IPlugin> _plugins;
@@ -55,6 +59,34 @@ namespace Themedit
             }
         }
 
+        private void translate()
+        {
+            var language = Translation.Current;
+
+            this.Resources["labelSubtitles_Txt.Content"] = language.MediaControls.labelSubtitles_Txt;
+            this.Resources["labelSubtilesOnOff.Content"] = language.MediaControls.labelSubtilesOnOff;
+            this.Resources["btnClose.ToolTip"] = language.MediaControls.btnClose;
+            this.Resources["logRichTextBox.Text}"] = language.MediaControls.logRichTextBox;
+            this.Resources["btnPrevious.ToolTip"] = language.MediaControls.btnPrevious;
+            this.Resources["btnPlay.ToolTip"] = language.MediaControls.btnPlay;
+            this.Resources["btnStop.ToolTip"] = language.MediaControls.btnStop;
+            this.Resources["btnPause.ToolTip"] = language.MediaControls.btnPause;
+            this.Resources["btnRewind.ToolTip"] = language.MediaControls.btnRewind;
+            this.Resources["btnForward.ToolTip"] = language.MediaControls.btnForward;
+            this.Resources["btnFullscreen.ToolTip"] = language.MediaControls.btnFullscreen;
+            this.Resources["btnSubtitles.ToolTip"] = language.MediaControls.btnSubtitles;
+            this.Resources["btnVolumeUp.ToolTip"] = language.MediaControls.btnVolumeUp;
+            this.Resources["btnVolumeDown.ToolTip"] = language.MediaControls.btnVolumeDown;
+            this.Resources["btnMute.ToolTip"] = language.MediaControls.btnMute;
+            this.Resources["btnSettings.ToolTip"] = language.MediaControls.btnSettings;
+            this.Resources["btnOpen.ToolTip"] = language.MediaControls.btnOpen;
+            this.Resources["btnPlaylist.ToolTip"] = language.MediaControls.btnPlaylist;
+            this.Resources["btnUrl.ToolTip"] = language.MediaControls.btnUrl;
+            this.Resources["btnSubtitlesOnOff.ToolTip"] = language.MediaControls.btnSubtitlesOnOff;
+            this.Resources["btnPlaylistNext.ToolTip"] = language.MediaControls.btnPlaylistNext;
+            this.Resources["btnPlaylistRepeater.ToolTip}"] = language.MediaControls.btnPlaylistRepeater;
+        }
+
         public MediaControls()
         {
             InitializeComponent();
@@ -70,7 +102,13 @@ namespace Themedit
             {
                 _comboboxPlugins.Items.Add(plugin.PluginName);
             }
-            //_fsw.EnableRaisingEvents = true;
+            OnLanguageChange += LanguageChange;
+            translate();
+        }
+
+        private void LanguageChange()
+        {
+            translate();            
         }
 
         public MediaControls(MediaPlaylist playlist) : this()
@@ -157,7 +195,8 @@ namespace Themedit
 
         private void btnSettings_Click(object sender, RoutedEventArgs e)
         {
-
+            SettingsWindow settings = new SettingsWindow();
+            settings.Show();
         }
 
         private void btnPlaylist_Click(object sender, RoutedEventArgs e)
@@ -166,7 +205,6 @@ namespace Themedit
             {
                 _playlist.Show();
                 _playlist.Activate();
-                _playlist.Topmost = true;
             }
             else
             {
@@ -236,6 +274,20 @@ namespace Themedit
         private void btnPlaylistRepeater_Click(object sender, RoutedEventArgs e)
         {
             
+        }
+
+        private void _comboboxPlugins_Selected(object sender, RoutedEventArgs e)
+        {
+            foreach (var plugin in _plugins)
+            {
+                if (plugin.PluginName == _comboboxPlugins.SelectedItem.ToString())
+                {
+                    var r = plugin.RunPlugin() as IPlugin;
+                    r.Show();
+                    if (!_runnedPlugins.Contains(r))
+                        _runnedPlugins.Add(r);
+                }
+            }
         }
     }
 

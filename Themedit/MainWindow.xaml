@@ -6,48 +6,15 @@
     xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
     xmlns:local="clr-namespace:Themedit"
     xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
-    xmlns:naudio="clr-namespace:NAudio;assembly=NAudio.Core"
     xmlns:wpf="http://schemas.microsoft.com/netfx/2007/xaml/presentation"
     x:Name="_metroWindow"
     Title="MainWindow"
-    Width="1024"
-    Height="820"
+    Width="1600"
+    Height="800"
+    Closed="_metroWindow_Closed"
     Closing="metroWindow_Closing"
-    Loaded="MetroWindow_OnLoaded" Closed="_metroWindow_Closed">
+    Loaded="MetroWindow_OnLoaded">
     <mah:MetroWindow.Resources>
-        <ControlTemplate x:Key="_mediaElementTemplate" TargetType="{x:Type Button}">
-            <Grid>
-                <MediaElement x:Name="mElement" />
-                <Ellipse x:Name="backgroundElement" Fill="{TemplateBinding Background}" />
-                <ContentPresenter
-                    x:Name="contentPresenter"
-                    HorizontalAlignment="Center"
-                    VerticalAlignment="Center" />
-                <VisualStateManager.VisualStateGroups>
-                    <VisualStateGroup x:Name="CommonStates">
-                        <VisualState x:Name="Normal">
-                            <Storyboard>
-                                <ColorAnimation
-                                    Storyboard.TargetName="backgroundElement"
-                                    Storyboard.TargetProperty="(Shape.Fill).(SolidColorBrush.Color)"
-                                    To="{TemplateBinding Background}"
-                                    Duration="0:0:0.3" />
-                            </Storyboard>
-                        </VisualState>
-                        <VisualState x:Name="MouseOver">
-                            <Storyboard>
-                                <ColorAnimation
-                                    Storyboard.TargetName="backgroundElement"
-                                    Storyboard.TargetProperty="(Shape.Fill).(SolidColorBrush.Color)"
-                                    To="Yellow"
-                                    Duration="0:0:0.3" />
-                            </Storyboard>
-                        </VisualState>
-                    </VisualStateGroup>
-                </VisualStateManager.VisualStateGroups>
-            </Grid>
-        </ControlTemplate>
-
         <Storyboard x:Key="fadeOut" FillBehavior="HoldEnd">
             <DoubleAnimation
                 Storyboard.TargetName="_mediaControls"

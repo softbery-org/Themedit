@@ -1,4 +1,4 @@
-// Version: 1.0.0.232
+// Version: 1.0.0.370
 // Copyright (c) 2024 Softbery by Pawe� Tobis
 using MahApps.Metro.Controls;
 using Microsoft.Win32;
@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
@@ -27,9 +28,6 @@ namespace Themedit
     /// </summary>
     public partial class MainWindow : MetroWindow
     {
-        public delegate void dlgPlayerHandle(object sender, PlayerEventArgs e);
-        public event dlgPlayerHandle OnPlayer;
-
         private MediaElementStatus _status;
         private DispatcherTimer _timer;
         private DispatcherTimer _mouseNotMoveTimer;
@@ -95,6 +93,7 @@ namespace Themedit
             mediaControlsButtonEvents();
             mediaControlsProgressBarEvents();
             keyboardEvents();
+            mouseEvents();
 
             PictogramViewer(PictogramAction.Hide);
 
@@ -116,14 +115,30 @@ namespace Themedit
 
         private void remove(Track track)
         {
-            Playlist.Remove(track);
+            try
+            {
+                Playlist.Remove(track);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"[{Translation.Current.ExceptionsMessage.Msg0003.ToString().Replace("Translation.Current.ExceptionsMessage.", "")}]: {Translation.Current.ExceptionsMessage.Msg0003}. {ex.Message}");
+            }
+            
         }
 
         private void set(Track track)
         {
             if (Playlist.Tracks.Contains(track))
             {
-                Playlist.SetCurrent(track.Path);
+                try
+                {
+                    Playlist.SetCurrent(track.Path);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"[{Translation.Current.ExceptionsMessage.Msg0002.ToString().Replace("Translation.Current.ExceptionsMessage.", "")}]: {Translation.Current.ExceptionsMessage.Msg0002}. {track.Name}");
+                }
+                
             }
         }
 
@@ -132,13 +147,21 @@ namespace Themedit
             Playlist.Tracks.Clear();
             foreach (var track in tracks)
             {
-                Playlist.Tracks.Add(track);
+                try
+                {
+                    Playlist.Tracks.Add(track);
+                }
+                catch (Exception ex) 
+                {
+                    MessageBox.Show($"[{Translation.Current.ExceptionsMessage.Msg0004.ToString().Replace("Translation.Current.ExceptionsMessage.", "")}]: {Translation.Current.ExceptionsMessage.Msg0004}. {ex.Message}");
+                }
+                
             }
         }
 
-        private void open(object sender, string e = "")
+        private void open(object sender, string path = "")
         {
-            if (e != null)
+            if (path != null)
             {
                 if (_mediaElement != null)
                 {
@@ -152,13 +175,13 @@ namespace Themedit
                         }
                     }
 
-                    Playlist.SetCurrent(e);
-                    _mediaElement.Source = new Uri(e);
+                    Playlist.SetCurrent(path);
+                    _mediaElement.Source = new Uri(path);
                     _mediaElement.Stop();
                     _mediaElement.Play();
                     _status = MediaElementStatus.Playing;
-                    _mediaControls.labelTitle.Content = e;
-                    _videoPath = e;
+                    _mediaControls.labelTitle.Content = path;
+                    _videoPath = path;
                     _timer.Stop();
                     _timer.Start();
                     _lblTask.Content = Playlist.Current.Name;
@@ -167,16 +190,17 @@ namespace Themedit
             }
         }
 
-        private void play(string trackName)
+        private void play(string track_path)
         {
             if (_mediaElement != null)
             {
                 foreach (var track in Playlist.Tracks)
                 {
-                    if (track.Name==trackName)
+                    if (track.Name==track_path)
                     {
                         Playlist.SetCurrent(Playlist.Tracks.IndexOf(track));
                         _timer.Stop();
+                        PlaylistWindow.SelectOnListView(track);
                         _mediaElement.Source = new Uri(track.Path);
                         _mediaElement.Play();
                         _status = MediaElementStatus.Playing;
@@ -195,6 +219,7 @@ namespace Themedit
                     Playlist.SetCurrent(Playlist.Tracks.IndexOf(track));
                     _timer.Stop();
                     _mediaElement.Source = new Uri(Playlist.Current.Path);
+                    PlaylistWindow.SelectOnListView(track);
                     _mediaElement.Play();
                     _status = MediaElementStatus.Playing;
                     _mediaControls.labelTitle.Content = track.Path;
@@ -213,6 +238,7 @@ namespace Themedit
                     var track = Playlist.Tracks[id];
                     Playlist.SetCurrent(Playlist.Tracks.IndexOf(track));
                     _timer.Stop();
+                    PlaylistWindow.SelectOnListView(track);
                     _mediaElement.Source = new Uri(Playlist.Current.Path);
                     _mediaElement.Play();
                     _status = MediaElementStatus.Playing;
@@ -220,6 +246,10 @@ namespace Themedit
                     _videoPath = Playlist.Current.Path;
                     _timer.Start();
                 }
+            }
+            else
+            {
+                MessageBox.Show(Translation.Current.ExceptionsMessage.Msg0000);
             }
         }
 
@@ -245,6 +275,10 @@ namespace Themedit
                     _timer.Start();
                     _status = MediaElementStatus.Playing;
                 }
+            }
+            else
+            {
+                MessageBox.Show(Translation.Current.ExceptionsMessage.Msg0000);
             }
         }
 
@@ -304,6 +338,11 @@ namespace Themedit
             this.KeyDown += _mediaElement_KeyDown;
         }
 
+        private void mouseEvents()
+        {
+            
+        }
+
         private void moveVideoForward(object sender, EventArgs e)
         {
             _mediaElement.Position += TimeSpan.FromSeconds(10);
@@ -339,6 +378,10 @@ namespace Themedit
                 // Video jump to time
                 var jump_to_sec = (_mediaElement.NaturalDuration.TimeSpan.TotalSeconds * result) / _mediaControls.progressBarVideo.Maximum;
                 _mediaElement.Position = TimeSpan.FromSeconds(jump_to_sec);
+            }
+            else
+            {
+                MessageBox.Show(Translation.Current.ExceptionsMessage.Msg0001);
             }
         }
 
@@ -930,6 +973,10 @@ namespace Themedit
                             else
                                 _mediaElement.Position += TimeSpan.FromSeconds(5);
                     break;
+                case Key.N:
+                    var next = Playlist.GetNext();
+                    play(next);
+                    break;
                 case Key.S:
                     BtnSubtilesOnOff_Click(sender, e); // Subtitles on / off
                     break;
@@ -1025,6 +1072,19 @@ namespace Themedit
         {
             _isMediaElementSelected = true;
             richTextBoxDrawContent(sender.GetType().Name + ": " + _isMediaElementSelected.ToString());
+
+            if (_status == MediaElementStatus.Playing)
+            {
+                _mediaElement.Pause();
+                _status = MediaElementStatus.Paused;
+                _timer.Stop();
+            }
+            else if (_status == MediaElementStatus.Paused)
+            {
+                _mediaElement.Play();
+                _status = MediaElementStatus.Playing;
+                _timer.Start();
+            }
 
             ClearFocus(sender);
         }
@@ -1126,39 +1186,5 @@ namespace Themedit
             }
             _sender = sender;
         }
-    }
-
-    public class PlayerEventArgs : RoutedEventArgs
-    {
-        public Uri Media { get; set; }
-        public PlayerActions Actions { get; set; }
-
-        public PlayerEventArgs()
-        {
-           
-        }
-    }
-
-    public enum PlayerActions
-    {
-        Play
-    }
-
-    public class VideoMovingEventArgs : EventArgs
-    {
-        public TimeSpan Time { get; private set; }
-        public MoveDirection Direction { get; private set; }
-
-        public VideoMovingEventArgs()
-        {
-
-        }
-    }
-
-    public enum MoveDirection 
-    {
-        Backward,
-        Forwarding,
-        Current
     }
 }
