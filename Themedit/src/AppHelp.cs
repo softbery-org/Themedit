@@ -1,4 +1,4 @@
-// Version: 1.0.0.275
+// Version: 1.0.0.277
 // Copyright (c) 2024 Softbery by Paweł Tobis
 using Microsoft.Win32;
 using System;

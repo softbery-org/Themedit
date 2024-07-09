@@ -1,4 +1,4 @@
-// Version: 1.0.0.449
+// Version: 1.0.0.451
 // Copyright (c) 2024 Softbery by Pawe� Tobis
 
 // Version: 1.0.0.79
@@ -249,6 +249,11 @@ namespace Themedit
                     var jump_to_sec = (w._mediaElement.NaturalDuration.TimeSpan.TotalSeconds * result) / progressBarVideo.Maximum;
                     w._mediaElement.Position = TimeSpan.FromSeconds(jump_to_sec);
                 }
+            }
+            if (_thumbnailMediaElement!=null && _thumbnailMediaElement.NaturalDuration.HasTimeSpan)
+            {
+                var time = TimeSpan.FromSeconds((_thumbnailMediaElement.NaturalDuration.TimeSpan.TotalSeconds * result) / progressBarVideo.Maximum);
+                _thumbnailTimer.Text = $"{time.Hours:00}:{time.Minutes:00}:{time.Seconds:00}";
             }
         }
 

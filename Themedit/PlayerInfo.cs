@@ -1,4 +1,4 @@
-// Version: 1.0.0.526
+// Version: 1.0.0.528
 // Copyright (c) 2024 Softbery by Paweł Tobis
 // 
 // MIT License

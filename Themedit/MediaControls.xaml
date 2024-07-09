@@ -532,7 +532,26 @@
             HorizontalAlignment="Left"
             VerticalAlignment="Top"
             Background="Black">
-            <MediaElement x:Name="_thumbnailMediaElement" Width="200" Height="100" IsMuted="True" />
+            <MediaElement
+                x:Name="_thumbnailMediaElement"
+                Width="200"
+                Height="100"
+                IsMuted="True" />
+            <TextBlock
+                x:Name="_thumbnailTimer"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Bottom"
+                TextAlignment="Center"
+                Width="200"
+                FontSize="23"
+                FontWeight="Bold"
+                Foreground="White"
+                Text="00:00:00"
+                Margin="0,70,0,0">
+                <TextBlock.Effect>
+                    <DropShadowEffect />
+                </TextBlock.Effect>
+            </TextBlock>
         </Canvas>
     </Grid>
 </UserControl>
