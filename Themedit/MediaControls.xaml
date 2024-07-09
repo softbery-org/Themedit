@@ -47,6 +47,8 @@
                 FontWeight="Bold"
                 Foreground="#FDB94C00"
                 MouseDown="progressBarVideo_MouseDown"
+                MouseEnter="progressBarVideo_MouseEnter"
+                MouseLeave="progressBarVideo_MouseLeave"
                 MouseMove="progressBarVideo_MouseMove"
                 ValueChanged="progressBarVideo_ValueChanged" />
             <Label
@@ -522,5 +524,15 @@
                     Kind="RepeatOn" />
             </StackPanel>
         </Button>
+        <Canvas
+            x:Name="_canvasThumbnail"
+            Width="200"
+            Height="100"
+            Margin="-200,-5,0,0"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Top"
+            Background="Black">
+            <MediaElement x:Name="_thumbnailMediaElement" Width="200" Height="100" IsMuted="True" />
+        </Canvas>
     </Grid>
 </UserControl>

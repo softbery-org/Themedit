@@ -1,4 +1,4 @@
-// Version: 1.0.0.307
+// Version: 1.0.0.384
 // Copyright (c) 2024 Softbery by Paweł Tobis
 using Microsoft.Win32;
 using System;
@@ -61,10 +61,16 @@ namespace Themedit
             this.Resources["btnClose.Content"] = language.Playlist.btnClose;
         }
 
-        private void load(Track[] track)
+        private async void load(Track[] tracks)
         {
             _listView.Items.Clear();
-            _listView.ItemsSource = track.ToList();
+            /*for (int i = 0; i < tracks.Length; i++)
+            {
+                var time = await new MediaInformation(tracks[i]).ReadAsync();
+                tracks[i].SetTime(time);
+            }*/
+
+            _listView.ItemsSource = tracks.ToList();
         }
 
         private void select(Track track)
@@ -74,7 +80,8 @@ namespace Themedit
                 var n = item.ToString();
                 if (n == track.Path)
                 {
-                    _listView.SelectedItem = item; break;
+                    _listView.SelectedItem = item; 
+                    break;
                 }
             }
         }
@@ -89,28 +96,30 @@ namespace Themedit
             this.Hide();
         }
 
-        public void AddMedia(string path)
+        public async Task AddMediaAsync(string path)
         {
             var t = new Track(path);
             _listView.Items.Add(t);
             IList<Track> list = new List<Track>();
-            foreach (var track in _listView.Items)
+            foreach (Track track in _listView.Items)
             {
-                var tr = new Track(track.ToString());
-                list.Add(tr);
+                track.SetTime(await track.ReadDurationAsync(track.Path));
+                list.Add(track);
             }
             MainWindow.SetPlaylist(list);
             
         }
 
-        public void AddMedia(string[] path)
+        public async Task AddMediaAsync(string[] path)
         {
             var t = new List<Track>();
             foreach (var item in path)
             {
                 var track = new Track(item);
+                track.SetTime(await track.ReadDurationAsync(item));
                 t.Add(track);
                 _listView.Items.Add(track);
+
             }
             MainWindow.SetPlaylist(t);
         }
@@ -140,7 +149,7 @@ namespace Themedit
             {
                 try 
                 { 
-                    AddMedia(ofd.FileNames);
+                    AddMediaAsync(ofd.FileNames);
                 }
                 catch(Exception ex)
                 {
@@ -180,6 +189,17 @@ namespace Themedit
         {
             ((MainWindow)_window).Playlist.Tracks.Clear();
             _listView.Items.Clear();
+        }
+
+        private async void btnRemMedia_Click(object sender, RoutedEventArgs e)
+        {
+            var result = new MediaInfoLib.MediaInfo();
+            result.Open((_listView.SelectedItem as Track).Path);
+            
+            var t = result.Inform();
+
+            MessageBox.Show(t);
+            result.Close();
         }
     }
 }

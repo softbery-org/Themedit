@@ -1,4 +1,4 @@
-// Version: 1.0.0.193
+// Version: 1.0.0.270
 // Copyright (c) 2024 Softbery by Paweł Tobis
 using System;
 using System.Collections.Generic;
@@ -20,26 +20,26 @@ namespace Themedit.src
         /// <summary>
         /// Track id
         /// </summary>
-        public int Id { get => _id; }
+        public int Id { get => _id; set => _id = value; }
 
         /// <summary>
         /// Track name
         /// </summary>
-        public string Name { get; private set; }
+        public string Name { get; set; }
 
         /// <summary>
         /// Track description
         /// </summary>
-        public string Description { get; private set; }
+        public string Description { get; set; }
 
         /// <summary>
         /// Track file path
         /// </summary>
-        public string Path { get; private set; }
+        public string Path { get; set; }
         /// <summary>
         /// Track time
         /// </summary>
-        public TimeSpan Time { get; private set; }
+        public TimeSpan Time { get; set; }
 
         MediaElement _mediaElement = new MediaElement();
         /// <summary>
@@ -48,7 +48,6 @@ namespace Themedit.src
         /// <param name="path"></param>
         public Track(string path)
         {
-            _mediaElement.MediaOpened += _mediaElement_SourceUpdated;
             var file = new FileInfo(path);
             var dir = new DirectoryInfo(path);
             if (file.Exists)
@@ -56,54 +55,82 @@ namespace Themedit.src
                 Name = file.Name;
                 Description = "";
                 Path = file.FullName;
-                _mediaElement.Source = new Uri(Path);
-                _mediaElement.LoadedBehavior = MediaState.Manual;
-                _mediaElement.ScrubbingEnabled = true;
-                _mediaElement.Play();
-                _mediaElement.Stop();
-                if (_mediaElement.NaturalDuration.HasTimeSpan)
-                {
-                    Time = _mediaElement.NaturalDuration.TimeSpan;
-                }
-                //_mediaElement.Position = TimeSpan.Zero;
-                //time = GetTime();
+                ReadDurationAsync(path);
                 _id++;
             }
         }
-        
-        public TimeSpan GetTime()
+
+        public async Task<TimeSpan> ReadDurationAsync(string path)
         {
-            
-                try
-                {
-                    _mediaElement.LoadedBehavior = MediaState.Manual;
-                    _mediaElement.Play();
-                    _mediaElement.Stop();
-                }catch(Exception ex)
-                {
-                    MessageBox.Show(ex.Message);
-                }
+            var time = TimeSpan.Zero;
 
-            if (_mediaElement.NaturalDuration.HasTimeSpan)
+            try 
             {
+                var probe = new NReco.VideoInfo.FFProbe();
 
-                return _mediaElement.NaturalDuration.TimeSpan;
+                await Task.Run(() =>
+                {
+                    var info = probe.GetMediaInfo(path);
+                    time = TimeSpan.Parse($"{info.Duration.Hours}:{info.Duration.Minutes}:{info.Duration.Seconds}");
+                });
+
+                return time;
             }
-            else
+            catch(Exception ex)
             {
-                return TimeSpan.Parse("00:01:00");
+                MessageBox.Show(ex.Message);
+
+                return TimeSpan.Zero;
             }
         }
 
-        private void _mediaElement_SourceUpdated(object sender, System.Windows.RoutedEventArgs e)
+        public void SetTime(TimeSpan time) 
         {
-            if (_mediaElement.NaturalDuration != null)
+            Time = time;
+        }
+
+        private async Task<string> GetTimeAsync()
+        {
+            try
             {
-                if (_mediaElement.NaturalDuration.HasTimeSpan)
-                {
-                    Time = _mediaElement.NaturalDuration.TimeSpan;
-                }
+                return ReadAsync(this).ToString();
             }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+                return "00:00:00";
+            }
+        }
+
+        private async Task<string> ReadAsync(Track track)
+        {
+            string s = "";
+
+            try
+            {
+                await Task.Run(() =>
+                {
+                    var media = new MediaInfoLib.MediaInfo();
+                    media.Open(track.Path);
+                    var split_line = media.Inform().Split('\n');
+
+                    for (int i = 0; i < split_line.Length; i++)
+                    {
+                        var split = split_line[i].Split(':');
+                        if (split[0].Contains("Duration"))
+                        {
+                            s = split[1];
+                            break;
+                        }
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+
+            return s;
         }
     }
 }

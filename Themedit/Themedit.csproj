@@ -194,6 +194,9 @@
     <Reference Include="MaterialDesignThemes.Wpf, Version=5.1.1.0, Culture=neutral, PublicKeyToken=df2a72020bd7962a, processorArchitecture=MSIL">
       <HintPath>..\packages\MaterialDesignThemes.5.1.1-ci675\lib\net462\MaterialDesignThemes.Wpf.dll</HintPath>
     </Reference>
+    <Reference Include="MediaInfoDotNet, Version=0.7.79.40925, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\MediaInfoDotNet.0.7.79.40925\lib\net45\MediaInfoDotNet.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.Bcl.AsyncInterfaces, Version=9.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Bcl.AsyncInterfaces.9.0.0-preview.5.24306.7\lib\net462\Microsoft.Bcl.AsyncInterfaces.dll</HintPath>
     </Reference>
@@ -236,6 +239,9 @@
     </Reference>
     <Reference Include="NAudio.Wasapi, Version=22.0.0.0, Culture=neutral, PublicKeyToken=e279aa5131008a41, processorArchitecture=MSIL">
       <HintPath>..\packages\NAudio.Wasapi.22.0.0\lib\netstandard2.0\NAudio.Wasapi.dll</HintPath>
+    </Reference>
+    <Reference Include="NReco.VideoInfo, Version=1.2.0.0, Culture=neutral, PublicKeyToken=8f59ee36d2987295, processorArchitecture=MSIL">
+      <HintPath>..\packages\NReco.VideoInfo.1.2.0\lib\net45\NReco.VideoInfo.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Buffers, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
@@ -303,11 +309,13 @@
     <Compile Include="src\AppHelp.cs" />
     <Compile Include="src\AutoUpdate.cs" />
     <Compile Include="src\Database.cs" />
+    <Compile Include="src\MediaInformation.cs" />
     <Compile Include="src\MediaPlaylist.cs" />
     <Compile Include="src\Playlist.cs" />
     <Compile Include="src\RegistryHelp.cs" />
     <Compile Include="src\Scripts\SQLStaticReader.cs" />
     <Compile Include="src\TaskDialog.cs" />
+    <Compile Include="src\Thumbnail.cs" />
     <Compile Include="src\Track.cs" />
     <Compile Include="src\TrackerList.cs" />
     <Compile Include="TaskLabel.cs" />
@@ -398,6 +406,9 @@
     </None>
     <None Include="config\playlist.ini" />
     <None Include="Git-Project.sh" />
+    <None Include="MediaInfoDotNet.dll.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -464,6 +475,12 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="src\Scripts\Update.sql" />
+    <Content Include="x64\MediaInfo.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="x86\MediaInfo.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <Content Include="themedit.mdf">

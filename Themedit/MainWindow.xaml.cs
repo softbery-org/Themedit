@@ -1,4 +1,4 @@
-// Version: 1.0.0.370
+// Version: 1.0.0.447
 // Copyright (c) 2024 Softbery by Pawe� Tobis
 using MahApps.Metro.Controls;
 using Microsoft.Win32;
@@ -19,7 +19,6 @@ using System.Windows.Media.Animation;
 using System.Windows.Threading;
 using Themedit.src;
 using Themedit.Subtitles;
-using ZM.Media.Info;
 
 namespace Themedit
 {
@@ -38,6 +37,8 @@ namespace Themedit
         private bool _subtitlesShow = true;
         private bool _mediaElementEnd;
         private bool _isMediaElementSelected = true;
+        private static Uri _currentMedia = null;
+        private static Uri _currentVideo = null;
 
         public MediaPlaylist Playlist { get; private set; }
 
@@ -105,12 +106,28 @@ namespace Themedit
             _lblSubtitles.Content = String.Empty;
             _mediaControls.MWindow = this;
             _mediaElement.MediaEnded += _mediaElement_MediaEnded;
+            _mediaElement.MediaOpened += _mediaElement_MediaOpened;
 
             OnOpeningMedia += open;
             PlayMedia += play;
             SetPlaylist += set;
             RemoveFromPlaylist += remove;
             SetCurrent += set;
+        }
+
+        private void _mediaElement_MediaOpened(object sender, RoutedEventArgs e)
+        {
+            MediaControls.ThumbnailMediaSet(_mediaElement.Source);
+        }
+
+        public static Uri GetCurrentMedia()
+        {
+            return _currentMedia;
+        }
+
+        private void thumbnailPlay(Track track)
+        {
+
         }
 
         private void remove(Track track)
@@ -329,8 +346,50 @@ namespace Themedit
         {
             _mediaControls.progressBarVideo.ValueChanged += ProgressBarVideo_ValueChanged;
             _mediaControls.progressBarVideo.MouseDown += ProgressBarVideo_MouseDown;
+            _mediaControls.progressBarVideo.MouseEnter += ProgressBarVideo_MouseEnter;
+            _mediaControls.progressBarVideo.MouseLeave += ProgressBarVideo_MouseLeave;
             _mediaControls.progressBarVolume.MouseDown += ProgressBarVolume_MouseDown;
             _mediaControls.MouseEnter += _mediaControlPanel_MouseEnter;
+        }
+
+        private void ProgressBarVideo_MouseLeave(object sender, MouseEventArgs e)
+        {
+            _mediaControls._canvasThumbnail.Visibility = Visibility.Hidden;
+        }
+
+        private bool _thumbnailVisibility = true;
+
+        private double _thumbnailX = -200;
+
+        private void ProgressBarVideo_MouseEnter(object sender, MouseEventArgs e)
+        {
+            /*_mediaControls._thumbnailMediaElement.LoadedBehavior = MediaState.Manual;
+            _mediaControls._canvasThumbnail.Visibility = Visibility.Visible;
+
+            var over_position = e.GetPosition(_mediaControls.progressBarVideo).X;
+            var width = _mediaControls.progressBarVideo.ActualWidth;
+            var X = (over_position / width) * _mediaControls.progressBarVideo.Maximum;
+
+            //MessageBox.Show(e.GetPosition(_mediaControls.progressBarVideo).X.ToString()+ Mouse.GetPosition(this).X);
+            _mediaControls._canvasThumbnail.Margin = new Thickness(0 + over_position, -5, 0, 0);
+            _mediaControls._thumbnailMediaElement.Source = new Uri(_videoPath);
+            _mediaControls._thumbnailMediaElement.Position = TimeSpan.Parse("00:25:41"); //TimeSpan.FromSeconds((_mediaControls._thumbnailMediaElement.NaturalDuration.TimeSpan.TotalSeconds * X) / _mediaControls.progressBarVideo.Maximum); _mediaControls._thumbnailMediaElement.Position = TimeSpan.FromSeconds((_mediaControls._thumbnailMediaElement.NaturalDuration.TimeSpan.TotalSeconds * X) / _mediaControls.progressBarVideo.Maximum);
+
+            if (_mediaControls._thumbnailMediaElement.NaturalDuration.HasTimeSpan)
+            {
+                _mediaControls._thumbnailMediaElement.Play();
+                _mediaControls._thumbnailMediaElement.Pause();
+            }*/
+            /*//progressBarVideo.Value = X;
+            if (_mediaControls._thumbnailMediaElement.NaturalDuration.HasTimeSpan)
+            {
+                // Video jump to time
+                var thumbnail = (_mediaControls._thumbnailMediaElement.NaturalDuration.TimeSpan.TotalSeconds * X) / _mediaControls.progressBarVideo.Maximum;
+
+
+                _mediaControls._thumbnailMediaElement.Position = TimeSpan.FromSeconds(thumbnail);
+                _mediaControls._canvasThumbnail.Margin = new Thickness(-200 + e.GetPosition(_mediaControls.progressBarVideo).X, -6, 0, 0);
+            }*/
         }
 
         private void keyboardEvents()

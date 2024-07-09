@@ -1,4 +1,4 @@
-// Version: 1.0.0.447
+// Version: 1.0.0.524
 using ControlzEx.Theming;
 using System;
 using System.Collections.Generic;

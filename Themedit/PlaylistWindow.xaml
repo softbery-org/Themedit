@@ -42,7 +42,7 @@
             Margin="180,42,6,0"
             HorizontalAlignment="Right"
             VerticalAlignment="Top"
-            Content="{DynamicResource btnRemMedia.Content}" />
+            Content="{DynamicResource btnRemMedia.Content}" Click="btnRemMedia_Click" />
         <Button
             x:Name="btnClrList"
             Margin="180,74,6,0"

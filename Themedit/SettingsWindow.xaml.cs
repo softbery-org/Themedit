@@ -1,4 +1,4 @@
-// Version: 1.0.0.76
+// Version: 1.0.0.153
 // Copyright (c) 2024 Softbery by Paweł Tobis
 using ThemeditLanguage;
 using System;
@@ -115,7 +115,7 @@ namespace Themedit
 
         private void _btnCancel_Click(object sender, RoutedEventArgs e)
         {
-            this.Close();
+            this.Hide();
         }
 
         private void translate()

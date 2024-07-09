@@ -1,4 +1,4 @@
-// Version: 1.0.0.365
+// Version: 1.0.0.442
 // Copyright (c) 2024 Softbery by Pawe� Tobis
 
 // Version: 1.0.0.79
@@ -30,9 +30,14 @@ namespace Themedit
     {
         public delegate void dlgChangeLanguageHandler();
         public delegate void dlgPlaylistHandle(ref string track);
-
+        public delegate void dlgMediaElementSeekHandler(object sender, RoutedPropertyChangedEventArgs<double> args);
+        public delegate void dlgThumbnailElementOpened(Uri media_path);
 
         public static Action OnLanguageChange;
+        public static Action<Uri> ThumbnailMediaSet;
+        public event dlgMediaElementSeekHandler OnMediaElementSeek;
+        public event dlgThumbnailElementOpened OnThumbnailElementOpened;
+
         private PlaylistWindow _playlist;
         private MediaPlaylist _mediaPlaylist;
         private IList<IPlugin> _plugins;
@@ -48,7 +53,6 @@ namespace Themedit
             {
                 if (_window == null)
                     _window = new PlaylistWindow();
-
                 return _window;
             }
             set
@@ -91,19 +95,29 @@ namespace Themedit
         {
             InitializeComponent();
 
-            /*_fsw = new FileSystemWatcher("plugins/", "*.dll");
-            _fsw.Changed += _fsw_Changed;
-            _fsw.Deleted += _fsw_Deleted;
-            _fsw.Renamed += _fsw_Renamed;
-            _fsw.Created += _fsw_Created;*/
             _plugins = Plugin.LoadPlugins();
 
             foreach (var plugin in _plugins)
             {
                 _comboboxPlugins.Items.Add(plugin.PluginName);
             }
+
+            _thumbnailMediaElement.LoadedBehavior = MediaState.Manual;
+
             OnLanguageChange += LanguageChange;
+            ThumbnailMediaSet += ThumbnailMediaUriSet;
+            OnMediaElementSeek += SeekToMediaPosition;
+
             translate();
+        }
+
+        private void ThumbnailMediaUriSet(Uri uri)
+        {
+            if (uri != null)
+            {
+                _thumbnailMediaElement.Source = uri;
+                _thumbnailMediaElement.Play();
+            }
         }
 
         private void LanguageChange()
@@ -115,43 +129,6 @@ namespace Themedit
         {
             _mediaPlaylist = playlist;
         }
-
-        /*private void _fsw_Created(object sender, FileSystemEventArgs e)
-        {
-            _plugins = Plugin.LoadPlugins();
-
-            foreach (var plugin in _plugins)
-            {
-                _comboboxPlugins.Items.AddTrack(plugin.PluginName);
-            }
-        }
-
-        private void _fsw_Renamed(object sender, RenamedEventArgs e)
-        {
-            _plugins = Plugin.LoadPlugins();
-
-            foreach (var plugin in _plugins)
-            {
-                _comboboxPlugins.Items.AddTrack(plugin.PluginName);
-            }
-        }
-
-        private void _fsw_Deleted(object sender, FileSystemEventArgs e)
-        {
-            _plugins = Plugin.LoadPlugins();
-
-            foreach (var plugin in _plugins)
-            {
-                _comboboxPlugins.Items.AddTrack(plugin.PluginName);
-            }
-        }
-
-        private void _fsw_Changed(object sender, FileSystemEventArgs e)
-        {
-            var s = sender as IPlugin;
-            var w = s as Window;
-            w.InvalidateVisual();
-        }*/
 
         private void _window_Closed(object sender, EventArgs e)
         {
@@ -193,10 +170,20 @@ namespace Themedit
 
         }
 
+        private SettingsWindow _settingsWindow;
+
         private void btnSettings_Click(object sender, RoutedEventArgs e)
         {
-            SettingsWindow settings = new SettingsWindow();
-            settings.Show();
+            if (_settingsWindow != null)
+            {
+                _settingsWindow.Show();
+                _settingsWindow.Activate();
+            }
+            else
+            {
+                _settingsWindow = new SettingsWindow();
+                _settingsWindow.Show();
+            }
         }
 
         private void btnPlaylist_Click(object sender, RoutedEventArgs e)
@@ -209,6 +196,7 @@ namespace Themedit
             else
             {
                 _playlist = new PlaylistWindow();
+                _playlist.Show();
             }
 
         }
@@ -288,6 +276,44 @@ namespace Themedit
                         _runnedPlugins.Add(r);
                 }
             }
+        }
+
+        //private MediaElement _thumbnailMediaElement = new MediaElement() { Width = 200, Height = 100, Margin=new Thickness(-200,-6,0,0)};
+        // Jump to different parts of the media (seek to).
+        private void SeekToMediaPosition(object sender, RoutedPropertyChangedEventArgs<double> args)
+        {
+            int SliderValue = (int)progressBarVideo.Value;
+
+            // Overloaded constructor takes the arguments days, hours, minutes, seconds, milliseconds.
+            // Create a TimeSpan with miliseconds equal to the slider value.
+            TimeSpan ts = new TimeSpan(0, 0, 0, 0, SliderValue);
+            _thumbnailMediaElement.Position = ts;
+        }
+
+        private void progressBarVideo_MouseEnter(object sender, MouseEventArgs e)
+        {
+            _canvasThumbnail.Visibility = Visibility.Visible;
+
+            var over_position = e.GetPosition(progressBarVideo).X;
+            var width = progressBarVideo.ActualWidth;
+            var X = (over_position / width) * progressBarVideo.Maximum;
+
+            //MessageBox.Show(e.GetPosition(_mediaControls.progressBarVideo).X.ToString()+ Mouse.GetPosition(this).X);
+            _canvasThumbnail.Margin = new Thickness(0 + over_position, -5, 0, 0);
+
+            if (_thumbnailMediaElement.NaturalDuration.HasTimeSpan)
+            {
+                var ts = TimeSpan.FromSeconds((_thumbnailMediaElement.NaturalDuration.TimeSpan.TotalSeconds * X) / progressBarVideo.Maximum);
+                _thumbnailMediaElement.Position = ts;
+                //_thumbnailMediaElement.Play();
+                //Task.Delay(3000);
+                //_thumbnailMediaElement.Pause();
+            }
+        }
+
+        private void progressBarVideo_MouseLeave(object sender, MouseEventArgs e)
+        {
+
         }
     }
 
