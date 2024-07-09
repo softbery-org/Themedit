@@ -1,4 +1,4 @@
-// Version: 1.0.0.442
+// Version: 1.0.0.449
 // Copyright (c) 2024 Softbery by Pawe� Tobis
 
 // Version: 1.0.0.79
@@ -31,12 +31,9 @@ namespace Themedit
         public delegate void dlgChangeLanguageHandler();
         public delegate void dlgPlaylistHandle(ref string track);
         public delegate void dlgMediaElementSeekHandler(object sender, RoutedPropertyChangedEventArgs<double> args);
-        public delegate void dlgThumbnailElementOpened(Uri media_path);
 
         public static Action OnLanguageChange;
         public static Action<Uri> ThumbnailMediaSet;
-        public event dlgMediaElementSeekHandler OnMediaElementSeek;
-        public event dlgThumbnailElementOpened OnThumbnailElementOpened;
 
         private PlaylistWindow _playlist;
         private MediaPlaylist _mediaPlaylist;
@@ -44,6 +41,7 @@ namespace Themedit
         private IList<IPlugin> _runnedPlugins = new List<IPlugin>();
         private FileSystemWatcher _fsw;
         private Window _window;
+        private VideoDrawing _videoDrawing;
 
         public MediaPlaylist Playlist { get => _mediaPlaylist; }
 
@@ -103,10 +101,10 @@ namespace Themedit
             }
 
             _thumbnailMediaElement.LoadedBehavior = MediaState.Manual;
+            _canvasThumbnail.Visibility = Visibility.Hidden;
 
             OnLanguageChange += LanguageChange;
             ThumbnailMediaSet += ThumbnailMediaUriSet;
-            OnMediaElementSeek += SeekToMediaPosition;
 
             translate();
         }
@@ -235,16 +233,16 @@ namespace Themedit
 
         private void progressBarVideo_MouseMove(object sender, MouseEventArgs e)
         {
+            var click_position = e.GetPosition(progressBarVideo).X;
+            var width = progressBarVideo.ActualWidth;
+            var result = (click_position / width) * progressBarVideo.Maximum;
+
             if (e.LeftButton == MouseButtonState.Pressed)
             {
                 var w = _window as MainWindow;
 
                 if (w._mediaElement.NaturalDuration.HasTimeSpan)
                 {
-                    var click_position = e.GetPosition(progressBarVideo).X;
-                    var width = progressBarVideo.ActualWidth;
-                    var result = (click_position / width) * progressBarVideo.Maximum;
-
                     progressBarVideo.Value = result;
 
                     // Video jump to time
@@ -278,18 +276,6 @@ namespace Themedit
             }
         }
 
-        //private MediaElement _thumbnailMediaElement = new MediaElement() { Width = 200, Height = 100, Margin=new Thickness(-200,-6,0,0)};
-        // Jump to different parts of the media (seek to).
-        private void SeekToMediaPosition(object sender, RoutedPropertyChangedEventArgs<double> args)
-        {
-            int SliderValue = (int)progressBarVideo.Value;
-
-            // Overloaded constructor takes the arguments days, hours, minutes, seconds, milliseconds.
-            // Create a TimeSpan with miliseconds equal to the slider value.
-            TimeSpan ts = new TimeSpan(0, 0, 0, 0, SliderValue);
-            _thumbnailMediaElement.Position = ts;
-        }
-
         private void progressBarVideo_MouseEnter(object sender, MouseEventArgs e)
         {
             _canvasThumbnail.Visibility = Visibility.Visible;
@@ -305,15 +291,17 @@ namespace Themedit
             {
                 var ts = TimeSpan.FromSeconds((_thumbnailMediaElement.NaturalDuration.TimeSpan.TotalSeconds * X) / progressBarVideo.Maximum);
                 _thumbnailMediaElement.Position = ts;
-                //_thumbnailMediaElement.Play();
-                //Task.Delay(3000);
-                //_thumbnailMediaElement.Pause();
+                _thumbnailMediaElement.Play();
             }
         }
 
         private void progressBarVideo_MouseLeave(object sender, MouseEventArgs e)
         {
-
+            if (_thumbnailMediaElement!=null)
+            {
+                _canvasThumbnail.Visibility = Visibility.Hidden;
+                _thumbnailMediaElement.Pause();
+            }
         }
     }
 

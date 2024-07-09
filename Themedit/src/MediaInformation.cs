@@ -1,4 +1,4 @@
-// Version: 1.0.0.76
+// Version: 1.0.0.83
 // Copyright (c) 2024 Softbery by Paweł Tobis
 using Microsoft.VisualStudio.Threading;
 using SfbLibrary;

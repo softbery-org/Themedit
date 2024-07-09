@@ -1,4 +1,4 @@
-// Version: 1.0.0.102
+// Version: 1.0.0.109
 // Copyright (c) 2024 Softbery by Paweł Tobis
 using MahApps.Metro.Controls.Dialogs;
 using System;
